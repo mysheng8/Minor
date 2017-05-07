@@ -157,10 +157,12 @@ public class LineMinorTeamFormat : MinorTeamFormat
     {
         //Debug.Log(m_followList.Count);
         Vector2 target=hitpos;
-
-        m_followList[0].Steering.Target = target;
-        m_followList[0].FSM.ChangeState(MinorMovingState.Instance);
-        target = m_followList[0].Pos;
+        if (m_followList[0].OnGround)
+        {
+            m_followList[0].Steering.Target = target;
+            m_followList[0].FSM.ChangeState(MinorMovingState.Instance);
+            target = m_followList[0].Pos;
+        }
 
         for (int i = 1; i < m_followList.Count; ++i)
         {

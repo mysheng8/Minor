@@ -297,13 +297,13 @@ public class SteeringBehaviors
         return targetWorld - m_Entity.Pos;
     }
 
-    Vector2 ObstacleAvoidance(List<StaticEntity> oList)
+    Vector2 ObstacleAvoidance(List<Obstacle> oList)
     {
         float dBoxLength = Config.MinDetectionBoxLength + (m_Entity.Speed / m_Entity.MaxSpeed) * Config.MinDetectionBoxLength;
-        BaseEntity ClosestIntersectingObstacle = null;
+        Obstacle ClosestIntersectingObstacle = null;
         float DistToClosestIP = Config.ObstacleMaxDistance;
         Vector2 LocalPosOfClosestObstacle = Vector2.zero;
-        foreach (BaseEntity obstacle in oList)
+        foreach (Obstacle obstacle in oList)
         {
             Vector2 LocalPos = yMath.PointToLocalSpace(obstacle.Pos, m_Entity.Heading, m_Entity.Side, m_Entity.Pos);
             
@@ -428,10 +428,14 @@ public class SteeringBehaviors
         Vector2 AverageHeading = Vector2.zero;
         foreach (BaseEntity neighbor in neighbors)
         {
-            if ((neighbor != m_Entity) && (neighbor.IsTagged))
+            if (!neighbor.IsStatic)
             {
-                AverageHeading += neighbor.Heading;
-                NeighborCount++;
+                if ((neighbor != m_Entity) && (neighbor.IsTagged))
+                {
+                    MovingEntity n = (MovingEntity)neighbor;
+                    AverageHeading += n.Heading;
+                    NeighborCount++;
+                }
             }
         }
         if (NeighborCount > 0)
@@ -489,12 +493,12 @@ public class SteeringBehaviors
     {
         foreach (BaseEntity e in ContainerOfEntities)
         {
-            e.IsTagged = false;
-            Vector2 to = e.Pos - entity.Pos;
-            float range = radius + e.BRadius;
-            if (e != entity && to.sqrMagnitude < range * range)
+            if (!e.IsStatic)
             {
-                e.IsTagged = true;
+                if (e.HitTest(entity.Pos, radius))
+                {
+                    e.IsTagged = true;
+                }
             }
         }
     }

@@ -9,13 +9,15 @@ public class Minor : Character
     {
         base.Awake();
         Health = Config.MinorHealth;
+        IsJumpable = true;
 	}
 	
 	// Update is called once per frame
     protected void Update()
     {
-        base.Update();
         EnforceNonOutWallConstraint(this, World.Walls());
+        
+        base.Update();
     }
 
     void EnforceNonOutWallConstraint(Character m, List<Wall> walls)

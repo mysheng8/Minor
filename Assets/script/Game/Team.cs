@@ -136,7 +136,7 @@ public class MinorTeam : Team
 
     public void RemoveMinor(Character ent)
     {
-        World.Partition.RemoveEntity((BaseEntity)ent, ent.LastPos);
+        World.Partition.RemoveEntity((BaseEntity)ent, ent.LastPosInCellSpace);
         GameObject.Destroy(ent.gameObject, 0);
         --m_Struct.TeamDict[ent.CType].Num;
         m_Members.Remove(ent);

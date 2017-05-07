@@ -14,7 +14,6 @@ public class Character : MovingEntity
     StateMachine<Character> m_StateMachine;
     Weapon m_Weapon;
     float random;
-    public override bool IsCharacter() { return true; }
 
     public float Height
     {
@@ -113,7 +112,6 @@ public class Character : MovingEntity
     public void Init(CharType ctype, int health, float radius, Team team, WeaponType wtype)
     {
         m_CType = ctype;
-        IsUpdatePosition = true;
         Team = team;
         BRadius = radius;
         Health = health;
@@ -138,12 +136,14 @@ public class Character : MovingEntity
         
         //float h = Mathf.Abs(Mathf.Sin((Time.realtimeSinceStartup + random) * 20.0f) * 2.0f) + 1;
         
-
         gameObject.transform.position = new Vector3(m_Pos.x, m_Height, m_Pos.y);
 
     }
 
-
+    public float GetGroundHeight()
+    {
+        return World.GetHeight(Pos);
+    }
 
     public override bool HandleMessage(Telegram msg)
     {

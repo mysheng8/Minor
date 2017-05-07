@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\script\Game\BaseEntity.cs" />
      <Compile Include="Assets\script\Game\Character.cs" />
      <Compile Include="Assets\script\Game\CharacterSpawner.cs" />
      <Compile Include="Assets\script\Game\DrawLine.cs" />
@@ -54,6 +55,9 @@
      <Compile Include="Assets\script\Game\GameWorld.cs" />
      <Compile Include="Assets\script\Game\Minor.cs" />
      <Compile Include="Assets\script\Game\MovingEntity.cs" />
+     <Compile Include="Assets\script\Game\Obstacle\CircleObstacle.cs" />
+     <Compile Include="Assets\script\Game\Obstacle\Obstacle.cs" />
+     <Compile Include="Assets\script\Game\Obstacle\RectObstacle.cs" />
      <Compile Include="Assets\script\Game\Projectile\Knife.cs" />
      <Compile Include="Assets\script\Game\Projectile\Magic.cs" />
      <Compile Include="Assets\script\Game\Projectile\Projectile.cs" />
@@ -61,14 +65,14 @@
      <Compile Include="Assets\script\Game\State\MinorState.cs" />
      <Compile Include="Assets\script\Game\State\SuperiorState.cs" />
      <Compile Include="Assets\script\Game\State\TeamState.cs" />
-     <Compile Include="Assets\script\Game\StaticEntity.cs" />
      <Compile Include="Assets\script\Game\SteeringBehaviors.cs" />
      <Compile Include="Assets\script\Game\Superior.cs" />
      <Compile Include="Assets\script\Game\Team.cs" />
      <Compile Include="Assets\script\Game\TeamFormation.cs" />
+     <Compile Include="Assets\script\Game\Trigger\Trigger.cs" />
+     <Compile Include="Assets\script\Game\Trigger\TriggerRegion.cs" />
      <Compile Include="Assets\script\Game\Wall.cs" />
      <Compile Include="Assets\script\Game\Weapon.cs" />
-     <Compile Include="Assets\script\Global\BaseEntity.cs" />
      <Compile Include="Assets\script\Global\CellSpacePartition.cs" />
      <Compile Include="Assets\script\Global\Config.cs" />
      <Compile Include="Assets\script\Global\LevelCreater.cs" />

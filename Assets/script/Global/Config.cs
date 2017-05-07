@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Config {
 
-    public static float gCameraMovementMaxSpeed = 140;
 
+    public static float gCameraMovementMaxSpeed = 140;
+    
     public static float Gravity = -10;
     public static float WallThickness = 5;
     public static float MinDetectionBoxLength = 15;
@@ -121,4 +122,14 @@ public class Config {
     }
 
     
+}
+
+
+public class HeightmapConfig
+{
+    public static float heightmapSampleUnitSizeX = 2.0f;
+    public static float heightmapSampleUnitSizeY = 2.0f;
+    public static float heightmapMaxHeightDistance = 100.0f;
+    public static int heightmapTextureSizeX = 512;
+    public static int heightmapTextureSizeY = 512;
 }

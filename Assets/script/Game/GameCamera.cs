@@ -106,11 +106,6 @@ public class LineGameCameraBehaviour : GameCameraBehaviour
             }
         }
         m_RollingDir = (tarPos - camPos).normalized;
-        if (m_RollingDir.x < 0)
-        {
-            m_RollingDir.x = 0;
-            m_RollingDir.Normalize();
-        }
         m_RollingSpeed = (tarPos - camPos).magnitude / 1.5f;
         if (m_RollingSpeed > Config.gCameraMovementMaxSpeed)
             m_RollingSpeed = Config.gCameraMovementMaxSpeed;
@@ -143,11 +138,6 @@ public class WallGameCameraBehaviour : GameCameraBehaviour
             }
         }
         m_RollingDir = (tarPos - camPos).normalized;
-        if (m_RollingDir.x < 0)
-        {
-            m_RollingDir.x = 0;
-            m_RollingDir.Normalize();
-        }
         m_RollingSpeed = (tarPos - camPos).magnitude / 1.5f;
         if (m_RollingSpeed > Config.gCameraMovementMaxSpeed)
             m_RollingSpeed = Config.gCameraMovementMaxSpeed;
@@ -180,11 +170,6 @@ public class BallGameCameraBehaviour : GameCameraBehaviour
             }
         }
         m_RollingDir = (tarPos - camPos).normalized;
-        if (m_RollingDir.x < 0)
-        {
-            m_RollingDir.x = 0;
-            m_RollingDir.Normalize();
-        }
         m_RollingSpeed = (tarPos - camPos).magnitude / 1.5f;
         if (m_RollingSpeed > Config.gCameraMovementMaxSpeed)
             m_RollingSpeed = Config.gCameraMovementMaxSpeed;

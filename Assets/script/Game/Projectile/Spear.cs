@@ -51,18 +51,10 @@ public class Spear : Projectile
         ent = null;
         foreach (BaseEntity e in ContainerOfEntities)
         {
-            Vector2 to = e.Pos - Pos;
-            float range = radius + e.BRadius;
-            if (e != m_Shooter && to.sqrMagnitude < range * range)
+            if (e.HitTest(Pos, BRadius) && e != m_Shooter)
             {
-                if (e.IsCharacter())
-                {
-                    if (m_Shooter.IsEnemy((Character)e))
-                    {
-                        result = true;
-                        ent = e;
-                    }
-                }
+                result = true;
+                ent = e;
             }
         }
         return result;

@@ -84,18 +84,8 @@ public class SuperiorDefaultGlobalState : State<Character>
         {
             if (curEntity != m)
             {
-                Vector2 ToEntity = m.Pos - curEntity.Pos;
-                float DistFromEachOther = ToEntity.magnitude;
-                if (DistFromEachOther >= 0.001f)
-                {
-                    float AmountOfOverLap = m.BRadius + curEntity.BRadius - DistFromEachOther;
-                    if (AmountOfOverLap >= 0)
-                    {
-                        m.Pos += (ToEntity / DistFromEachOther) * AmountOfOverLap;
-
-                    }
-                }
-
+                Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
+                m.Pos += pushOffset;
             }
         }
     }

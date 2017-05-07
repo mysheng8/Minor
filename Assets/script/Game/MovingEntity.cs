@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class MovingEntity : BaseEntity
 {
+    protected Vector2 m_Heading = Vector2.zero;
+    protected Vector2 m_Side = Vector2.zero;
+    protected Vector2 m_LastPosInCellSpace;
+    public float m_BRadius = 1.0f;
     Vector2 m_Velocity;
     float m_Mass = 0.1f;
     float m_MaxSpeed = 20;
@@ -11,13 +15,48 @@ public class MovingEntity : BaseEntity
     float m_MaxTurnRate = 2;
     float m_Damping = 0.05f;
     bool m_OnGround = true;
-
+    
     BaseEntity m_Target;//move target 
+    SteeringBehaviors m_Steering;
     Vector2 m_TeamOffset;
 
-    SteeringBehaviors m_Steering;
+    public Vector2 LastPosInCellSpace
+    {
+        get
+        {
+            return m_LastPosInCellSpace;
+        }
+    }
 
-    public override bool IsMovingEntity() { return true; }
+    public float BRadius
+    {
+        get
+        {
+            return m_BRadius;
+        }
+        set
+        {
+            m_BRadius = value;
+        }
+    }
+
+    public Vector2 Heading
+    {
+        get
+        {
+            return m_Heading;
+        }
+    }
+
+    public Vector2 Side
+    {
+        get
+        {
+            return m_Side;
+        }
+    }
+
+
     public BaseEntity Target
     {
         get
@@ -101,7 +140,6 @@ public class MovingEntity : BaseEntity
         {
             m_OnGround = value;
         }
-
     }
 
 	// Use this for initialization
@@ -113,11 +151,24 @@ public class MovingEntity : BaseEntity
         m_Steering = new SteeringBehaviors(this);
 
 	}
-	
+
+    float timer = 0;
 	// Update is called once per frame
 	protected void Update () 
     {
-        base.Update();
+        if (m_World.isEditorMode)
+            return;
+        IsStatic = false;
+        //update position in Cell
+        timer -= Time.deltaTime;
+        if (timer <= 0)
+        {
+            m_World.Partition.UpdateEntity(this, m_LastPosInCellSpace);
+            m_LastPosInCellSpace = m_Pos;
+            timer = Config.NumSecondUpdateEntityPosition;
+        }
+
+        m_World.Partition.CalculateNeighbors(m_Pos);
         
         Vector2 SteeringForce = m_Steering.Calculate();
         Vector2 acceleration = SteeringForce / m_Mass;
@@ -143,5 +194,15 @@ public class MovingEntity : BaseEntity
         //Debug.DrawLine(gameObject.transform.position, line);
 
 	}
+
+    public override bool HitTest(Vector2 entityPos, float entityRadius)
+    {
+        return yMath.CircleHitTest(Pos, BRadius, entityPos, entityRadius);
+    }
+
+    public override Vector2 CalculatePenetrationConstraint(Vector2 entityPos, float entityRadius)
+    {
+        return yMath.CalculateCircleOverlay(Pos, BRadius, entityPos, entityRadius);
+    }
 
 }

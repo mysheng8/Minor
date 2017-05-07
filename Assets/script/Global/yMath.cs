@@ -79,6 +79,104 @@ public class yMath
 
     }
 
+    public static bool CircleHitTest(Vector2 centorA, float radiusA, Vector2 centorB, float radiusB)
+    {
+        Vector2 to = centorB - centorA;
+        float range = radiusA + radiusB;
+        if (to.sqrMagnitude < range * range)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static Vector2 CalculateCircleOverlay(Vector2 centorA, float radiusA, Vector2 centorB, float radiusB)
+    {
+        Vector2 result = Vector2.zero;
+        Vector2 to = centorB - centorA ;
+        float distance = to.magnitude;
+        if (distance >= 0.001f)
+        {
+            float overLap = radiusA + radiusB - distance;
+            if (overLap >= 0)
+            {
+                result = (to / distance) * overLap;
+            }
+        }
+        return result;
+    }
+
+    public static bool RectHitTest(Rect rect, float radiusA, Vector2 centor, float radiusB)
+    {
+        bool result = false;
+        float range = radiusA + radiusB;
+        result = result || (new Vector2(rect.xMin, rect.yMin) - centor).sqrMagnitude < range * range;
+        result = result || (new Vector2(rect.xMax, rect.yMin) - centor).sqrMagnitude < range * range;
+        result = result || (new Vector2(rect.xMin, rect.yMax) - centor).sqrMagnitude < range * range;
+        result = result || (new Vector2(rect.xMax, rect.yMax) - centor).sqrMagnitude < range * range;
+        result = result || ((centor.x > rect.xMin - range) && (centor.x < rect.xMax + range) && (centor.y > rect.yMin) && (centor.y < rect.yMax));
+        result = result || ((centor.x > rect.xMin) && (centor.x < rect.xMax) && (centor.y > rect.yMin - range) && (centor.y < rect.yMax + range));
+        return result;    
+    }
+
+    public static Vector2 CalculateRectOverlay(Rect rect, float radiusA, Vector2 centor, float radiusB)
+    {
+        Vector2 result = Vector2.zero;
+        //return Vector2.zero;
+        float range = radiusA + radiusB;
+        if (centor.x<rect.xMin)
+        {
+            if(centor.y>rect.yMax)
+                return CalculateCircleOverlay(new Vector2(rect.xMin,rect.yMax), radiusA, centor, radiusB);
+            else if(centor.y<rect.yMin)
+                return CalculateCircleOverlay(new Vector2(rect.xMin,rect.yMin), radiusA, centor, radiusB);
+            else
+            {
+                float overLap = radiusA + radiusB - (rect.xMin - centor.x);
+                if (overLap >= 0)
+                return new Vector2(-overLap,0);
+            }
+        }
+        else if (centor.x>rect.xMax)
+        {
+            if(centor.y>rect.yMax)
+                return CalculateCircleOverlay(new Vector2(rect.xMax,rect.yMax), radiusA, centor, radiusB);
+            else if(centor.y<rect.yMin)
+                return CalculateCircleOverlay(new Vector2(rect.xMax,rect.yMin), radiusA, centor, radiusB);
+            else
+            {
+                float overLap = radiusA + radiusB - (centor.x - rect.xMax);
+                if (overLap >= 0)
+                return new Vector2(overLap,0);
+            }      
+        }
+        else
+        {
+            if(centor.y>rect.yMax)
+            {
+                float overLap = radiusA + radiusB - (centor.y - rect.yMax);
+                if (overLap >= 0)
+                return new Vector2(0,overLap);
+            } 
+            else if(centor.y<rect.yMin)
+            {
+                float overLap = radiusA + radiusB - (rect.yMin - centor.y );
+                if (overLap >= 0)
+                return new Vector2(0,-overLap);          
+            }
+            else
+            {
+                float yMinOverLap = radiusA + radiusB - (rect.yMin - centor.y );
+                float yMaxOverLap = radiusA + radiusB - (centor.y - rect.yMax);
+                if(yMinOverLap>yMaxOverLap)
+                    return new Vector2(0, -yMinOverLap); 
+                else
+                    return new Vector2(0, yMaxOverLap);
+            }
+        }
+        return Vector2.zero;
+    }
+
 
     public static Vector2 RotationVector2(Vector2 Dir, float angle)
     { 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Wall : MonoBehaviour 
+public class Wall : BaseEntity 
 {
     public Vector2 fromOffset;
     public Vector2 toOffset;
@@ -35,6 +35,7 @@ public class Wall : MonoBehaviour
 
     void Awake()
     {
+        base.Awake();
         m_Normal = new Vector2(gameObject.transform.forward.x, gameObject.transform.forward.z);
         Vector2 Side = new Vector2(gameObject.transform.right.x,gameObject.transform.right.z);
         m_Pos = new Vector2(gameObject.transform.position.x, gameObject.transform.position.z);
