@@ -128,6 +128,9 @@ public class MinorJumpState : State<Character>
                 {
                     Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
                     m.Pos += pushOffset;
+                    Vector3 pos = new Vector3(m.Pos.x, m.Height, m.Pos.y);
+                    Vector3 posMove = new Vector3(pushOffset.x, m.Height, pushOffset.y);
+                    Debug.DrawLine(pos, pos + posMove * 10);
                     /*
                     Vector2 ToEntity = m.Pos - curEntity.Pos;
                     float DistFromEachOther = ToEntity.magnitude;
@@ -202,6 +205,10 @@ public class MinorBigJumpState : State<Character>
                 {
                     Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
                     m.Pos += pushOffset;
+
+                    Vector3 pos = new Vector3(m.Pos.x, m.Height, m.Pos.y);
+                    Vector3 posMove = new Vector3(pushOffset.x, m.Height, pushOffset.y);
+                    Debug.DrawLine(pos, pos + posMove * 10);
                 }
             }
         }
@@ -270,6 +277,9 @@ public class MinorIdleState : State<Character>
                 if (curEntity != m && curEntity.IsNonPenetrationConstraint)
                 {
                     Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
+                    Vector3 pos = new Vector3(m.Pos.x, m.Height, m.Pos.y);
+                    Vector3 posMove = new Vector3(pushOffset.x, m.Height, pushOffset.y);
+                    Debug.DrawLine(pos, pos + posMove * 10);
                     if (pushOffset.magnitude > 0.01f)
                     {
                         if (curEntity.IsJumpable)
@@ -385,6 +395,9 @@ public class MinorMovingState : State<Character>
                 if (curEntity != m && curEntity.IsNonPenetrationConstraint)
                 {
                     Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
+                    Vector3 pos = new Vector3(m.Pos.x, m.Height, m.Pos.y);
+                    Vector3 posMove = new Vector3(pushOffset.x, m.Height, pushOffset.y);
+                    Debug.DrawLine(pos, pos + posMove * 10);
                     if (pushOffset.magnitude > 0.01f)
                     {
                         if (curEntity.IsJumpable)

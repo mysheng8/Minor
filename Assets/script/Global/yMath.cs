@@ -132,9 +132,10 @@ public class yMath
                 return CalculateCircleOverlay(new Vector2(rect.xMin,rect.yMin), radiusA, centor, radiusB);
             else
             {
-                float overLap = radiusA + radiusB - (rect.xMin - centor.x);
-                if (overLap >= 0)
-                return new Vector2(-overLap,0);
+                float distance = centor.x - rect.xMin;
+                float overlap = radiusA + radiusB - Mathf.Abs(distance);
+                if (overlap >= 0)
+                    return new Vector2(Mathf.Abs(distance) / distance * overlap, 0);
             }
         }
         else if (centor.x>rect.xMax)
@@ -145,33 +146,65 @@ public class yMath
                 return CalculateCircleOverlay(new Vector2(rect.xMax,rect.yMin), radiusA, centor, radiusB);
             else
             {
-                float overLap = radiusA + radiusB - (centor.x - rect.xMax);
-                if (overLap >= 0)
-                return new Vector2(overLap,0);
+                float distance = centor.x - rect.xMax;
+                float overlap = radiusA + radiusB - Mathf.Abs(distance);
+                if (overlap >= 0)
+                    return new Vector2(Mathf.Abs(distance) / distance * overlap, 0);
             }      
         }
         else
         {
             if(centor.y>rect.yMax)
             {
-                float overLap = radiusA + radiusB - (centor.y - rect.yMax);
-                if (overLap >= 0)
-                return new Vector2(0,overLap);
+                float distance = centor.y - rect.yMax;
+                float overlap = radiusA + radiusB - Mathf.Abs(distance);
+                if (overlap >= 0)
+                    return new Vector2(0, Mathf.Abs(distance) / distance * overlap);
             } 
             else if(centor.y<rect.yMin)
             {
-                float overLap = radiusA + radiusB - (rect.yMin - centor.y );
-                if (overLap >= 0)
-                return new Vector2(0,-overLap);          
+                float distance = centor.y - rect.yMin;
+                float overlap = radiusA + radiusB - Mathf.Abs(distance);
+                if (overlap >= 0)
+                    return new Vector2(0, Mathf.Abs(distance) / distance * overlap);          
             }
             else
             {
-                float yMinOverLap = radiusA + radiusB - (rect.yMin - centor.y );
-                float yMaxOverLap = radiusA + radiusB - (centor.y - rect.yMax);
-                if(yMinOverLap>yMaxOverLap)
-                    return new Vector2(0, -yMinOverLap); 
-                else
-                    return new Vector2(0, yMaxOverLap);
+                float yMindistance = centor.y - rect.yMin;
+
+                float yMaxdistance = centor.y - rect.yMax;
+
+                float xMindistance = centor.x - rect.xMin;
+
+                float xMaxdistance = centor.y - rect.xMax;
+
+                float clostdis = 999;
+                float overlap=0,distance=1;
+                if (Mathf.Abs(yMindistance) < clostdis)
+                {
+                    clostdis = Mathf.Abs(yMindistance);
+                    overlap = radiusA + radiusB - clostdis;
+                    distance = yMindistance;
+                }
+                if (Mathf.Abs(yMaxdistance) < clostdis)
+                {
+                    clostdis = Mathf.Abs(yMaxdistance);
+                    overlap = radiusA + radiusB - clostdis;
+                    distance = yMaxdistance;
+                }
+                if (Mathf.Abs(xMindistance) < clostdis)
+                {
+                    clostdis = Mathf.Abs(xMindistance);
+                    overlap = radiusA + radiusB - clostdis;
+                    distance = xMindistance;
+                }
+                if (Mathf.Abs(xMaxdistance) < clostdis)
+                {
+                    clostdis = Mathf.Abs(xMaxdistance);
+                    overlap = radiusA + radiusB - clostdis;
+                    distance = xMaxdistance;
+                }
+                return new Vector2(0, Mathf.Abs(distance) / distance * overlap);
             }
         }
         return Vector2.zero;

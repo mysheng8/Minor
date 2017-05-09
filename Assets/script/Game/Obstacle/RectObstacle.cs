@@ -22,8 +22,7 @@ public class RectObstacle : Obstacle
         Vector2 localPos = yMath.PointToLocalSpace(entityPos, m_Heading, m_Side, Pos);
         Vector2 localMove = yMath.CalculateRectOverlay(ObstacleRegion, StopDistance, localPos, entityRadius);
         //return localMove;
-        Vector2 Move = yMath.VectorToWorldSpace(localMove, m_Heading, m_Side);
-        Debug.DrawLine(entityPos, entityPos + Move);
+
         return yMath.VectorToWorldSpace(localMove, m_Heading, m_Side);
     }
     // Use this for initialization
@@ -37,7 +36,7 @@ public class RectObstacle : Obstacle
 
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         cube.transform.position = new Vector3(Pos.x, 0, Pos.y);
-        cube.transform.rotation = Quaternion.LookRotation(new Vector3(m_Heading.x, 0, m_Heading.y));
+        cube.transform.rotation = Quaternion.LookRotation(new Vector3(m_Side.x, 0, m_Side.y));
         cube.transform.localScale = new Vector3(ObstacleRegion.width, 100, ObstacleRegion.height);
 
     }
