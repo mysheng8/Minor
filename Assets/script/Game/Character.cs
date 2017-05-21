@@ -2,30 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Character : MovingEntity
+public class Character : BaseEntity
 {
     CharType m_CType;
 
     int m_Health = Config.DefaultHealth;
     int m_Attention = Config.TimeToClamDown;
-    float m_Height = 0;
-    float m_JumpVelocity = 0;
-    Team m_Team;
-    StateMachine<Character> m_StateMachine;
-    Weapon m_Weapon;
-    float random;
 
-    public float Height
-    {
-        get
-        {
-            return m_Height;
-        }
-        set
-        {
-            m_Height = value;
-        }
-    }
+    Team m_Team;
+    Weapon m_Weapon;
+
+    StateMachine<Character> m_StateMachine;
+    FreeMovement m_Movement;
+    SteeringBehaviors m_Steering;
+
+
+    //jump parameter
+    float m_JumpVelocity;
+    bool m_OnGround = true;
 
     public float JumpVelocity
     {
@@ -38,6 +32,19 @@ public class Character : MovingEntity
             m_JumpVelocity = value;
         }
     }
+    public bool OnGround
+    {
+        get
+        {
+            return m_OnGround;
+        }
+        set
+        {
+            m_OnGround = value;
+        }
+    }
+
+    float random;
 
     public CharType CType
     {
@@ -46,7 +53,6 @@ public class Character : MovingEntity
             return m_CType;
         }
     }
-
 
     public StateMachine<Character> FSM
     {
@@ -103,6 +109,22 @@ public class Character : MovingEntity
             m_Attention = value;
         }
     }
+    public SteeringBehaviors Steering
+    {
+        get
+        {
+            return m_Steering;
+        }
+    }
+
+
+    public FreeMovement Movement
+    {
+        get
+        {
+            return m_Movement;
+        }
+    }
 
     public bool IsEnemy(Character ent)
     {
@@ -123,7 +145,13 @@ public class Character : MovingEntity
     public void Awake()
     {
         base.Awake();
+        //need to update cell space
+        IsStatic = false;
+        EType = EntityType.Character;
+        Pos = new Vector2(transform.position.x, transform.position.z);
         m_StateMachine = new StateMachine<Character>(this);
+        m_Movement = new FreeMovement(this);
+        m_Steering = m_Movement.Steering;
         random = Random.value / 2;
     }
 
@@ -132,12 +160,13 @@ public class Character : MovingEntity
     {
         base.Update();
         
+        m_Movement.UpdateTransform();
         m_StateMachine.Update();
+        //Debug.Log(GetInstanceID() + " pos: " + Pos + " states: " + (m_StateMachine.CurrentState()));
+        gameObject.transform.position = m_Movement.GetPosition();
+        gameObject.transform.rotation = m_Movement.GetRotation();
         
-        //float h = Mathf.Abs(Mathf.Sin((Time.realtimeSinceStartup + random) * 20.0f) * 2.0f) + 1;
         
-        gameObject.transform.position = new Vector3(m_Pos.x, m_Height, m_Pos.y);
-
     }
 
     public float GetGroundHeight()
@@ -145,8 +174,24 @@ public class Character : MovingEntity
         return World.GetHeight(Pos);
     }
 
+    public Vector3 GetWorldPosition()
+    {
+        return m_Movement.GetPosition();
+    }
+
     public override bool HandleMessage(Telegram msg)
     {
         return m_StateMachine.HandleMessage(msg);
     }
+
+    public override bool HitTest(Vector2 entityPos, float entityRadius)
+    {
+        return yMath.CircleHitTest(Pos, BRadius, entityPos, entityRadius);
+    }
+
+    public override Vector2 CalculatePenetrationConstraint(Vector2 entityPos, float entityRadius)
+    {
+        return yMath.CalculateCircleOverlay(Pos, BRadius, entityPos, entityRadius);
+    }
+
 }

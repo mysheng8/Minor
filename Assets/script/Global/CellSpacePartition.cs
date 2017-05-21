@@ -82,6 +82,11 @@ public class CellSpacePartition
     {
         int LastIndex = PositionToIndex(lastPos);
         int Index = PositionToIndex(ent.Pos);
+
+        if (Index >= m_Cells.Count || Index < 0)
+            Debug.LogError(ent.GetInstanceID() + " has out of range of the cell space");
+
+
         if ( LastIndex > m_Cells.Count)
         {
             Debug.LogAssertion("wrong last position: " + lastPos);

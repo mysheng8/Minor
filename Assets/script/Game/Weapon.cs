@@ -58,7 +58,7 @@ public class Weapon {
             if (distanceToEnemy.sqrMagnitude < MaxDist * MaxDist)
             {
                 MaxDist = distanceToEnemy.magnitude;
-                m_Owner.Target = ent;
+                m_Owner.Movement.Target = ent;
                 result = true;
             }
         }

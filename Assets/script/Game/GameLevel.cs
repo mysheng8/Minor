@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -37,6 +38,11 @@ public class GameLevel
     public Vector2 ExitPos()
     {
         return m_ld.ExitPos + m_LevelOffset;
+    }
+
+    public Vector2 StartPos()
+    {
+        return m_ld.EnterPos + m_LevelOffset;
     }
 
 
@@ -90,7 +96,7 @@ public class GameLevel
             Vector3 pos = m.pos + new Vector3(m_LevelOffset.x, 0, m_LevelOffset.y);
             Quaternion rot = m.rot;
             GameObject res = Resources.Load(m.assetPath) as GameObject;
-            GameObject pref = Object.Instantiate(res, pos, rot) as GameObject;
+            GameObject pref = UnityEngine.Object.Instantiate(res, pos, rot) as GameObject;
             m_mapObjects.Add(pref);
         }
 
@@ -99,7 +105,7 @@ public class GameLevel
             Vector3 pos = w.pos + new Vector3(m_LevelOffset.x, 0, m_LevelOffset.y);
             Quaternion rot = w.rot;
             GameObject res = Resources.Load(w.assetPath) as GameObject;
-            GameObject pref = Object.Instantiate(res, pos, rot) as GameObject;
+            GameObject pref = UnityEngine.Object.Instantiate(res, pos, rot) as GameObject;
             //add wall to list
             m_Walls.Add(pref.GetComponent<Wall>());
         }
@@ -109,8 +115,13 @@ public class GameLevel
             Vector3 pos = o.pos + new Vector3(m_LevelOffset.x, 0, m_LevelOffset.y);
             Quaternion rot = o.rot;
             GameObject res = Resources.Load(o.assetPath) as GameObject;
-            GameObject pref = Object.Instantiate(res, pos, rot) as GameObject;
-            Obstacle ent = pref.GetComponent<Obstacle>();
+            GameObject pref = UnityEngine.Object.Instantiate(res, pos, rot) as GameObject;
+            ObstacleData data = o.data;
+            Type t = ObstacleTable.GetObstacleType(data.ToString());
+            Obstacle ent = pref.AddComponent(t) as Obstacle;
+            ent.InitData(data, this);
+            //Debug.Log(data.ToString());
+            //Obstacle ent = pref.GetComponent<Obstacle>();
             //add obstacles to list
             m_Obstacles.Add(ent);
 
@@ -133,17 +144,17 @@ public class GameLevel
     {
         foreach (Wall w in m_Walls)
         {
-            Object.Destroy(w.gameObject, 0);
+            UnityEngine.Object.Destroy(w.gameObject, 0);
         }
         foreach (Obstacle o in m_Obstacles)
         {
-            Object.Destroy(o.gameObject, 0);
+            UnityEngine.Object.Destroy(o.gameObject, 0);
         }
         foreach (GameObject m in m_mapObjects)
         {
-            Object.Destroy(m, 0);
+            UnityEngine.Object.Destroy(m, 0);
         }
-        Object.Destroy(m_Heightmap, 0);
+        UnityEngine.Object.Destroy(m_Heightmap, 0);
     }
 
     public bool IsExceedCellSpace(Vector2 pos)
@@ -165,13 +176,36 @@ public class GameLevel
 
     public bool IsExceedMap(Vector2 pos)
     {
-        return (pos.x >= m_ld.heightmapSampleRect.max.x + m_LevelOffset.x);
+        return (pos.x >= m_ld.heightmapSampleRect.xMax + m_LevelOffset.x);
     }
 
     public bool IsBehindMap(Vector2 pos)
     {
-        return (pos.x <= m_ld.heightmapSampleRect.min.x + m_LevelOffset.x);
+        return (pos.x <= m_ld.heightmapSampleRect.xMin + m_LevelOffset.x);
     }
 
+    public void SetActive()
+    {
+        foreach (Obstacle o in m_Obstacles)
+        {
+            o.IsActive = true;
+        }
+        foreach (Wall w in m_Walls)
+        {
+            w.IsActive = true;
+        }
+    }
+
+    public void SetDeActive()
+    {
+        foreach (Obstacle o in m_Obstacles)
+        {
+            o.IsActive = false;
+        }
+        foreach (Wall w in m_Walls)
+        {
+            w.IsActive = false;
+        }
+    }
 
 }

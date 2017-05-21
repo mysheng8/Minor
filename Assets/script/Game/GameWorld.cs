@@ -87,7 +87,7 @@ public class GameWorld : MonoBehaviour {
         {
             int n = Config.LevelList().Count;
             int i = (int)(Random.value*n);
-            next.Init(m_currentLevel.ExitPos(), Config.LevelList()[0]);
+            next.Init(m_currentLevel.ExitPos(), Config.LevelList()[1]);
         }
         return next;   
     }
@@ -99,15 +99,16 @@ public class GameWorld : MonoBehaviour {
             m_currentLevel = spawnNextLevel(true);
             m_previousLevel = m_currentLevel;
             m_nextLevel = spawnNextLevel(false);
+            m_currentLevel.SetActive();
             m_camera = GameObject.Find("CameraRoot").GetComponent<GameCamera>();
             m_camera.SetCameraBehaviourType(CameraBehaviourType.Line);
             TeamStruct mts = new TeamStruct();
             mts.TeamDict.Add(CharType.MinorKnife, new TeamDesc(Config.MinorKnifeHealth, 4, 15, WeaponType.Wpn_Knife));
-            mts.TeamDict.Add(CharType.MinorSpear, new TeamDesc(Config.MinorSpearHealth, 4, 8, WeaponType.Wpn_Spear));
+            mts.TeamDict.Add(CharType.MinorSpear, new TeamDesc(Config.MinorSpearHealth, 4, 6, WeaponType.Wpn_Spear));
             //mts.TeamDict.Add(CharType.MinorMagic, new TeamDesc(Config.MinorMagicHealth, 2, 5, WeaponType.Wpn_Magic));
 
 
-            m_teamA = new MinorTeam(mts, 23);
+            m_teamA = new MinorTeam(mts, 21);
             m_teamA.Spawner = new MinorSpawner();
             m_teamA.OnStart();
 
@@ -153,11 +154,13 @@ public class GameWorld : MonoBehaviour {
             m_nextLevel = spawnNextLevel(false);
             m_previousLevel = m_currentLevel;
         }
-
+        m_currentLevel.SetActive();
+        m_previousLevel.SetDeActive();
     }
 
     public float GetHeight(Vector2 pos)
     {
+        
         if (m_currentLevel.IsExceedMap(pos))
         {
             return m_nextLevel.GetHeight(pos);

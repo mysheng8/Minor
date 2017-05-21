@@ -89,6 +89,7 @@ public class LineMinorTeamFormat : MinorTeamFormat
     { 
         hitpos = Vector2.zero;
         m_followList = new List<Character>();
+
     }
     public override Vector2 GetMoveTarget() { return hitpos; }
     public override void OnMouseUpdate(TeamStruct ts, List<Character> Members)
@@ -119,10 +120,11 @@ public class LineMinorTeamFormat : MinorTeamFormat
         if (time <= 0)
         {
             sortMembers(Members);
-            time = 30;
+            time = 20;
             
         }
         --time;
+        
         UpdateTeam(ts, Members);
     }
 
@@ -155,6 +157,7 @@ public class LineMinorTeamFormat : MinorTeamFormat
 
     protected override void UpdateTeam(TeamStruct ts, List<Character> Members)
     {
+        
         //Debug.Log(m_followList.Count);
         Vector2 target=hitpos;
         if (m_followList[0].OnGround)
@@ -168,8 +171,8 @@ public class LineMinorTeamFormat : MinorTeamFormat
         {
             if (m_followList[i].OnGround)
             {
-                float lookAheadTime = (m_followList[i].Pos - m_followList[i - 1].Pos).magnitude *4/ (m_followList[i - 1].MaxSpeed + m_followList[i].Speed);
-                m_followList[i].Steering.Target = target + m_followList[i].Velocity * lookAheadTime;
+                float lookAheadTime = (m_followList[i].Pos - m_followList[i - 1].Pos).magnitude * 4 / (m_followList[i - 1].Movement.MaxSpeed + m_followList[i].Movement.Speed);
+                m_followList[i].Steering.Target = target +m_followList[i].Movement.Velocity * lookAheadTime;
                 m_followList[i].FSM.ChangeState(MinorMovingState.Instance);
                 target = m_followList[i].Pos;
             }

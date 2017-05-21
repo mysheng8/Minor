@@ -54,7 +54,7 @@ public class SuperiorDefaultGlobalState : State<Character>
                 {
                     Vector2 dir = (pInfo.Shooter.Pos - entity.Pos).normalized;
                     entity.Pos -= dir * pInfo.BackForward;
-                    entity.Target = pInfo.Shooter;
+                    entity.Movement.Target = pInfo.Shooter;
                     entity.Health -= pInfo.Damage;
                 }
                 entity.FSM.ChangeState(SuperiorDefaultAttackState.Instance);
@@ -65,7 +65,7 @@ public class SuperiorDefaultGlobalState : State<Character>
                 pInfo = (ProjectileExtraInfo)msg.ExtraInfo;
                 if (entity.IsEnemy(pInfo.Shooter))
                 {
-                    entity.Target = pInfo.Shooter;
+                    entity.Movement.Target = pInfo.Shooter;
                     entity.Health -= pInfo.Damage;
                 }
                 entity.FSM.ChangeState(SuperiorDefaultAttackState.Instance);
@@ -107,7 +107,7 @@ public class SuperiorDefaultIdleState : State<Character>
     }
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = Config.MaxSpeedWander;
+        entity.Movement.MaxSpeed = Config.MaxSpeedWander;
         float FarGoal = 0;
         Vector2 GoalPos = Vector2.zero;
         foreach (Vector2 g in Config.ExitPositions())
@@ -153,17 +153,17 @@ public class SuperiorDefaultAttackState : State<Character>
     }
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = Config.MaxSpeedAttention;
+        entity.Movement.MaxSpeed = Config.MaxSpeedAttention;
         entity.Attention = Config.TimeToClamDown;
     }
     public override void Execute(Character entity)
     {
-        if (entity.Weapon.AimAt(entity.Target.Pos, true))
-            entity.Weapon.ShootAt((Character)entity.Target);
+        if (entity.Weapon.AimAt(entity.Movement.Target.Pos, true))
+            entity.Weapon.ShootAt(entity.Movement.Target);
 
         entity.Attention -= 1;
 
-        if (((Character)entity.Target).Health <= 0 || entity.Attention <= 0)
+        if (((Character)entity.Movement.Target).Health <= 0 || entity.Attention <= 0)
             entity.FSM.ChangeState(SuperiorDefaultIdleState.Instance);
 
     }
@@ -185,7 +185,7 @@ public class SuperiorDefaultFleeState : State<Character>
     }
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = Config.MaxSpeedAttention;
+        entity.Movement.MaxSpeed = Config.MaxSpeedAttention;
         entity.Attention = Config.TimeToClamDown;
         
         entity.Steering.IsEvade = true;
@@ -223,7 +223,7 @@ public class SuperiorDefaultGoneState : State<Character>
 
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = Config.MaxSpeedFlee;
+        entity.Movement.MaxSpeed = Config.MaxSpeedFlee;
         float closetGoal = 99999;
         Vector2 GoalPos = Vector2.zero;
         foreach (Vector2 g in Config.ExitPositions())

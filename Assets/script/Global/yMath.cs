@@ -60,22 +60,29 @@ public class yMath
     public static float DistPointToLine2D(Vector2 point, Vector2 lineFrom, Vector2 lineTo)
     {
         float a,b,c;
+        //float result = 0.0f;
         a = Vector2.Distance(point, lineFrom);
         if (a < 0.0001)
             return -1.0f;
         b = Vector2.Distance(point, lineTo);
         if (b < 0.0001)
-            return -1.0f;
+            return -2.0f;
         c = Vector2.Distance(lineFrom, lineTo);
         if (c < 0.0001)
-            return -1.0f;
-        if (a * a >= b * b + c * c) 
-            return -1.0f;
-        if (b * b >= a * a + c * c)   
-            return -1.0f;
+            return -3.0f;
+        if (a*a >= b*b + c*c )
+            return -4.0f;
+        if (b*b >= a*a + c*c )
+            return -5.0f;
         float l = (a + b + c) / 2;     //周长的一半   
         float s = Mathf.Sqrt(l * (l - a) * (l - b) * (l - c));  //海伦公式求面积   
-        return 2 * s / c;  
+        float d = 2 * s / c;
+        /*
+        if (a>d&&b>d)
+            return -6.0f;*/
+        //result = d;
+        //Debug.Log(a + "|" + b + "|" + c + "|" + d);
+        return d;  
 
     }
 
@@ -95,13 +102,10 @@ public class yMath
         Vector2 result = Vector2.zero;
         Vector2 to = centorB - centorA ;
         float distance = to.magnitude;
-        if (distance >= 0.001f)
+        float overLap = radiusA + radiusB - distance;
+        if (overLap >= 0)
         {
-            float overLap = radiusA + radiusB - distance;
-            if (overLap >= 0)
-            {
-                result = (to / distance) * overLap;
-            }
+            result = (to / distance) * overLap;
         }
         return result;
     }
@@ -170,13 +174,13 @@ public class yMath
             }
             else
             {
-                float yMindistance = centor.y - rect.yMin;
+                float yMindistance = rect.yMin - centor.y;
 
-                float yMaxdistance = centor.y - rect.yMax;
+                float yMaxdistance = rect.yMax - centor.y;
 
-                float xMindistance = centor.x - rect.xMin;
+                float xMindistance = rect.xMin - centor.x;
 
-                float xMaxdistance = centor.y - rect.xMax;
+                float xMaxdistance = rect.xMax - centor.y;
 
                 float clostdis = 999;
                 float overlap=0,distance=1;

@@ -1,6 +1,9 @@
-﻿using System.Collections;
+﻿//#define DEBUGMODE
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+
 
 public class MinorGlobalState : State<Character>
 {
@@ -31,7 +34,7 @@ public class MinorGlobalState : State<Character>
             t.RemoveMinor(entity);
 
         }
-        
+        EnforceNonOutWallConstraint(entity, entity.World.Walls());
     }
     public override void Exit(Character entity)
     {
@@ -53,7 +56,7 @@ public class MinorGlobalState : State<Character>
                 pInfo = (ProjectileExtraInfo)msg.ExtraInfo;
                 if (entity.IsEnemy(pInfo.Shooter))
                 {
-                    entity.Target = pInfo.Shooter;
+                    entity.Movement.Target = pInfo.Shooter;
                     entity.Health -= pInfo.Damage;
                 }
                 break;
@@ -61,13 +64,38 @@ public class MinorGlobalState : State<Character>
                 pInfo = (ProjectileExtraInfo)msg.ExtraInfo;
                 if (entity.IsEnemy(pInfo.Shooter))
                 {
-                    entity.Target = pInfo.Shooter;
+                    entity.Movement.Target = pInfo.Shooter;
                     entity.Health -= pInfo.Damage;
                 }
                 break; 
 
         }
         return result;
+    }
+    void EnforceNonOutWallConstraint(Character m, List<Wall> walls)
+    {
+        foreach (Wall w in walls)
+        {
+            Vector2 dir = m.Movement.Pos - w.From();
+            float dis = yMath.DistPointToLine2D(m.Movement.Pos, w.From(), w.To());
+            //Debug.Log(m.GetInstanceID() + "Distance To Wall = " + dis + "; Current Pos = " + m.Movement.Pos);
+            if (dis > 0 && dis < Config.MinDetectionWallDistance)
+            {
+                float AmountOfOverLap;
+                if (Vector2.Dot(w.Normal(), dir) > 0)
+                    AmountOfOverLap = m.BRadius + Config.WallThickness - dis;
+                else
+                    AmountOfOverLap = m.BRadius + Config.WallThickness + dis;
+
+                //Debug.Log("[" + Time.time + "]" + m.GetInstanceID() + m.Pos + dis + AmountOfOverLap);
+                if (AmountOfOverLap > 0)
+                {
+                    Vector2 move = w.Normal() * (AmountOfOverLap);
+                    //Debug.Log("["+ Time.time + "]"+ m.GetInstanceID() + m.Pos + move +  dis +  AmountOfOverLap);
+                    m.Movement.Pos += move;
+                }
+            }
+        }
     }
 
 }
@@ -87,34 +115,44 @@ public class MinorJumpState : State<Character>
     }
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = Config.MaxSpeedJump;
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Enter " + this);
+#endif
+        entity.Movement.MaxSpeed = Config.MaxSpeedJump;
         entity.OnGround = false;
-        entity.JumpVelocity = 2.0f;
-        Vector2 JumpTo = (entity.Steering.Target - entity.Pos).normalized;
-        entity.Velocity = JumpTo * entity.MaxSpeed;
-        entity.IsNonPenetrationConstraint = false;
+        entity.JumpVelocity = 2.5f;
+        Vector2 JumpTo = entity.Movement.Heading;//(entity.Steering.Target - entity.Pos).normalized;
+        entity.Movement.Velocity = JumpTo * entity.Movement.MaxSpeed;
+        //entity.IsNonPenetrationConstraint = false;
+        
     }
     public override void Execute(Character entity)
     {
         entity.JumpVelocity += Config.Gravity * Time.deltaTime;
 
         float ground_height = entity.GetGroundHeight();
-        entity.Height += entity.JumpVelocity;
-        if (entity.Height <= ground_height && entity.JumpVelocity<0)
+        entity.Movement.Height += entity.JumpVelocity;
+        if (entity.Movement.Height <= ground_height && entity.JumpVelocity < 0)
         {
-            entity.Height = ground_height;
-            if(entity.FSM.PreviousState()==this)
-                entity.FSM.ChangeState(MinorMovingState.Instance);
+            entity.Movement.Height = ground_height;
+            if (entity.FSM.PreviousState() == this)
+                entity.FSM.ChangeState(MinorIdleState.Instance);
+            if (entity.FSM.PreviousState() == MinorBigJumpState.Instance)
+                entity.FSM.ChangeState(MinorIdleState.Instance);
             entity.FSM.RevertToPreviousState();
         }
+        EnforceNonPenetrationConstraint(entity, entity.World.Partition.Neighbors());
     }
 
     public override void Exit(Character entity)
     {
-        entity.Height = entity.GetGroundHeight();
-        entity.IsNonPenetrationConstraint = true;
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Exit " + this);
+#endif
+        entity.Movement.Height = entity.GetGroundHeight();
+        //entity.IsNonPenetrationConstraint = true;
         entity.OnGround = true;
-        entity.MaxSpeed = 0;
+        entity.Movement.MaxSpeed = 0;
         EnforceNonPenetrationConstraint(entity, entity.World.Partition.Neighbors());
 
     }
@@ -124,24 +162,22 @@ public class MinorJumpState : State<Character>
         {
             foreach (BaseEntity curEntity in ContrainerOfEntities)
             {
-                if (curEntity != m && curEntity.IsNonPenetrationConstraint)
+                if (curEntity != m && curEntity.IsNonPenetrationConstraint && !curEntity.IsJumpable)
                 {
-                    Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
-                    m.Pos += pushOffset;
-                    Vector3 pos = new Vector3(m.Pos.x, m.Height, m.Pos.y);
-                    Vector3 posMove = new Vector3(pushOffset.x, m.Height, pushOffset.y);
-                    Debug.DrawLine(pos, pos + posMove * 10);
+
+                    Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Movement.Pos, m.BRadius);
                     /*
-                    Vector2 ToEntity = m.Pos - curEntity.Pos;
-                    float DistFromEachOther = ToEntity.magnitude;
-                    if (DistFromEachOther >= 0.001f)
+                    Vector3 pos = m.Movement.GetPosition();
+                    Vector3 posMove = new Vector3(pushOffset.x, 0, pushOffset.y);
+                    Debug.DrawLine(pos, pos + posMove);*/
+                    if (!curEntity.IsJumpable && !m.OnGround)
                     {
-                        float AmountOfOverLap = m.BRadius + curEntity.BRadius - DistFromEachOther;
-                        if (AmountOfOverLap >= 0)
-                        {
-                            m.Pos += (ToEntity / DistFromEachOther) * AmountOfOverLap;
-                        }
-                    }*/
+                        m.Movement.Pos += pushOffset;
+                    }
+                    else if (m.OnGround)
+                    {
+                        m.Movement.Pos += pushOffset;
+                    }
                 }
             }
         }
@@ -164,34 +200,43 @@ public class MinorBigJumpState : State<Character>
     }
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = Config.MaxSpeedJump;
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Enter " + this);
+#endif
+        entity.Movement.MaxSpeed = Config.MaxSpeedJump;
         entity.OnGround = false;
         entity.JumpVelocity = 3.5f;
         Vector2 JumpTo = (entity.Steering.Target - entity.Pos).normalized;
-        entity.Velocity = JumpTo * entity.MaxSpeed;
-        entity.IsNonPenetrationConstraint = false;
+        entity.Movement.Velocity = JumpTo * entity.Movement.MaxSpeed;
+        //entity.IsNonPenetrationConstraint = false;
     }
     public override void Execute(Character entity)
     {
         entity.JumpVelocity += Config.Gravity * Time.deltaTime;
 
         float ground_height = entity.GetGroundHeight();
-        entity.Height += entity.JumpVelocity;
-        if (entity.Height <= ground_height && entity.JumpVelocity < 0)
+        entity.Movement.Height += entity.JumpVelocity;
+        if (entity.Movement.Height <= ground_height && entity.JumpVelocity < 0)
         {
-            entity.Height = ground_height;
+            entity.Movement.Height = ground_height;
             if (entity.FSM.PreviousState() == this)
-                entity.FSM.ChangeState(MinorMovingState.Instance);
+                entity.FSM.ChangeState(MinorIdleState.Instance);
+            if (entity.FSM.PreviousState() == MinorJumpState.Instance)
+                entity.FSM.ChangeState(MinorIdleState.Instance);
             entity.FSM.RevertToPreviousState();
         }
+        EnforceNonPenetrationConstraint(entity, entity.World.Partition.Neighbors());
     }
 
     public override void Exit(Character entity)
     {
-        entity.Height = entity.GetGroundHeight();
-        entity.IsNonPenetrationConstraint = true;
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Exit " + this);
+#endif
+        entity.Movement.Height = entity.GetGroundHeight();
+        //entity.IsNonPenetrationConstraint = true;
         entity.OnGround = true;
-        entity.MaxSpeed = 0;
+        entity.Movement.MaxSpeed = 0;
         EnforceNonPenetrationConstraint(entity, entity.World.Partition.Neighbors());
 
     }
@@ -201,14 +246,21 @@ public class MinorBigJumpState : State<Character>
         {
             foreach (BaseEntity curEntity in ContrainerOfEntities)
             {
-                if (curEntity != m && curEntity.IsNonPenetrationConstraint)
+                if (curEntity != m && curEntity.IsNonPenetrationConstraint && !curEntity.IsJumpable)
                 {
-                    Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
-                    m.Pos += pushOffset;
-
-                    Vector3 pos = new Vector3(m.Pos.x, m.Height, m.Pos.y);
-                    Vector3 posMove = new Vector3(pushOffset.x, m.Height, pushOffset.y);
-                    Debug.DrawLine(pos, pos + posMove * 10);
+                    Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Movement.Pos, m.BRadius);
+                    /*
+                    Vector3 pos = m.Movement.GetPosition();
+                    Vector3 posMove = new Vector3(pushOffset.x, 0, pushOffset.y);
+                    Debug.DrawLine(pos, pos + posMove);*/
+                    if (!curEntity.IsJumpable && !m.OnGround)
+                    {
+                        m.Movement.Pos += pushOffset;
+                    }
+                    else if (m.OnGround)
+                    {
+                        m.Movement.Pos += pushOffset;
+                    }
                 }
             }
         }
@@ -231,7 +283,10 @@ public class MinorIdleState : State<Character>
     }
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = Config.MaxSpeedWander;
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Enter " + this);
+#endif
+        entity.Movement.MaxSpeed = Config.MaxSpeedWander;
         entity.Steering.IsWander = true;
         entity.Steering.IsAlignment = true;
         entity.Steering.IsCohesion = true;
@@ -245,16 +300,20 @@ public class MinorIdleState : State<Character>
 
         if (entity.Weapon.FindEnemy(t.Members()))
             entity.FSM.ChangeState(MinorAttackState.Instance);*/
-        entity.Height = entity.World.GetHeight(entity.Pos);
-        float deltaHeight = entity.World.GetHeight(entity.Pos + entity.Heading * 10) - entity.Height;
+        entity.Height = entity.GetGroundHeight();
+        float deltaHeight = entity.World.GetHeight(entity.Pos + entity.Movement.Heading * Config.MinDetectionJumpDistance) - entity.Movement.Height;
         if (deltaHeight > 10)
         {
-            Debug.Log("Jump " + deltaHeight);
+#if DEBUGMODE
+            Debug.Log("[" + Time.time + "]" + entity.GetInstanceID() + "; Current Pos = " + entity.Pos + "; Jump " + deltaHeight);
+#endif
             entity.FSM.ChangeState(MinorBigJumpState.Instance);
         }
         if (deltaHeight < -10)
         {
-            Debug.Log("Jump " + deltaHeight);
+#if DEBUGMODE
+            Debug.Log("[" + Time.time + "]" + entity.GetInstanceID() + "; Current Pos = " + entity.Pos + "; Jump " + deltaHeight);
+#endif
             entity.FSM.ChangeState(MinorJumpState.Instance);
         }
         EnforceNonPenetrationConstraint(entity, entity.World.Partition.Neighbors());
@@ -262,7 +321,10 @@ public class MinorIdleState : State<Character>
 
     public override void Exit(Character entity)
     {
-        entity.MaxSpeed = 0;
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Exit " + this);
+#endif
+        entity.Movement.MaxSpeed = 0;
         entity.Steering.IsWander = false;
         entity.Steering.IsAlignment = false;
         entity.Steering.IsCohesion = false;
@@ -276,11 +338,12 @@ public class MinorIdleState : State<Character>
             {
                 if (curEntity != m && curEntity.IsNonPenetrationConstraint)
                 {
-                    Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
-                    Vector3 pos = new Vector3(m.Pos.x, m.Height, m.Pos.y);
-                    Vector3 posMove = new Vector3(pushOffset.x, m.Height, pushOffset.y);
-                    Debug.DrawLine(pos, pos + posMove * 10);
-                    if (pushOffset.magnitude > 0.01f)
+                    Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Movement.Pos, m.BRadius);
+                    /*
+                    Vector3 pos = m.Movement.GetPosition();
+                    Vector3 posMove = new Vector3(pushOffset.x, 0, pushOffset.y);
+                    Debug.DrawLine(pos, pos + posMove);*/
+                    if (pushOffset.magnitude > 0)
                     {
                         if (curEntity.IsJumpable)
                         {
@@ -288,7 +351,7 @@ public class MinorIdleState : State<Character>
                         }
                         else
                         {
-                            m.Pos += pushOffset;
+                            m.Movement.Pos += pushOffset;
                         }
                     }
                 }
@@ -348,42 +411,52 @@ public class MinorMovingState : State<Character>
     }
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = Config.MaxSpeedMoving;
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Enter " + this);
+#endif
+        entity.Movement.MaxSpeed = Config.MaxSpeedMoving;
         entity.Attention = Config.TimeToStandUpSlow;
         entity.Steering.IsArrive = true;
     }
     public override void Execute(Character entity)
     {
-        
-        entity.Height = entity.World.GetHeight(entity.Pos);
-        float deltaHeight =  entity.World.GetHeight(entity.Pos + entity.Heading*10) - entity.Height;
+
+        entity.Movement.Height = entity.GetGroundHeight();
+        float deltaHeight = entity.World.GetHeight(entity.Pos + entity.Movement.Heading * Config.MinDetectionJumpDistance) - entity.Movement.Height;
         if (deltaHeight > 10)
         {
-            Debug.Log("Jump " + deltaHeight);
+#if DEBUGMODE
+            Debug.Log("[" + Time.time + "]" + entity.GetInstanceID() + "; Current Pos = " + entity.Pos + "; Jump " + deltaHeight);
+#endif
             entity.FSM.ChangeState(MinorBigJumpState.Instance);
         }
         if (deltaHeight < -10)
         {
-            Debug.Log("Jump " + deltaHeight);
+#if DEBUGMODE
+            Debug.Log("[" + Time.time + "]" + entity.GetInstanceID() + "; Current Pos = " + entity.Pos + "; Jump " + deltaHeight);
+#endif
             entity.FSM.ChangeState(MinorJumpState.Instance);
         }
         --entity.Attention;
         if (entity.Attention <= 0)
             entity.FSM.ChangeState(MinorIdleState.Instance);
-
+        
         if (entity.Steering.HasArrived())
             entity.FSM.ChangeState(MinorDefenceState.Instance);
 
         Team t = entity.World.GetOpponent(entity.Team);
         if (entity.Weapon.FindEnemy(t.Members()))
-            if (entity.Weapon.AimAt(entity.Target.Pos, false))
-                entity.Weapon.ShootAt((Character)entity.Target);
+            if (entity.Weapon.AimAt(entity.Movement.Target.Pos, false))
+                entity.Weapon.ShootAt((Character)entity.Movement.Target);
         EnforceNonPenetrationConstraint(entity, entity.World.Partition.Neighbors());
     }
     public override void Exit(Character entity)
     {
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Exit " + this);
+#endif
         entity.Steering.IsArrive = false;
-        entity.MaxSpeed = 0;
+        entity.Movement.MaxSpeed = 0;
     }
 
     void EnforceNonPenetrationConstraint(Character m, List<BaseEntity> ContrainerOfEntities)
@@ -394,11 +467,13 @@ public class MinorMovingState : State<Character>
             {
                 if (curEntity != m && curEntity.IsNonPenetrationConstraint)
                 {
-                    Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Pos, m.BRadius);
-                    Vector3 pos = new Vector3(m.Pos.x, m.Height, m.Pos.y);
-                    Vector3 posMove = new Vector3(pushOffset.x, m.Height, pushOffset.y);
-                    Debug.DrawLine(pos, pos + posMove * 10);
-                    if (pushOffset.magnitude > 0.01f)
+                    Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Movement.Pos, m.BRadius);
+                    
+                    Vector3 pos = m.Movement.GetPosition();
+                    Vector3 posMove = new Vector3(pushOffset.x, 0, pushOffset.y);
+                    Debug.DrawLine(pos, pos + posMove*10);
+
+                    if (pushOffset.magnitude > 0)
                     {
                         if (curEntity.IsJumpable)
                         {
@@ -406,7 +481,7 @@ public class MinorMovingState : State<Character>
                         }
                         else
                         {
-                            m.Pos += pushOffset;
+                            m.Movement.Pos += pushOffset;
                         }
                     }
                     /*
@@ -446,7 +521,10 @@ public class MinorDefenceState : State<Character>
     }
     public override void Enter(Character entity)
     {
-        entity.MaxSpeed = 0;
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Enter " + this);
+#endif
+        entity.Movement.MaxSpeed = 0;
         //entity.Attention = Config.TimeToStandUpSlow;
         
     }
@@ -454,18 +532,20 @@ public class MinorDefenceState : State<Character>
     {
         Team t = entity.World.GetOpponent(entity.Team);
         if (entity.Weapon.FindEnemy(t.Members()))
-            if (entity.Weapon.AimAt(entity.Target.Pos, false))
-                entity.Weapon.ShootAt((Character)entity.Target);
+            if (entity.Weapon.AimAt(entity.Movement.Target.Pos, false))
+                entity.Weapon.ShootAt((Character)entity.Movement.Target);
         /*
         --entity.Attention;
         if (entity.Attention <= 0)
             entity.FSM.ChangeState(MinorIdleState.Instance);
         */
-        entity.Height = entity.World.GetHeight(entity.Pos);
+        entity.Movement.Height = entity.World.GetHeight(entity.Pos);
     }
     public override void Exit(Character entity)
     {
-
+#if DEBUGMODE
+        Debug.Log(entity.GetInstanceID() + " Exit " + this);
+#endif
     }
 }
 

@@ -9,15 +9,17 @@ public class Config {
     
     public static float Gravity = -10;
     public static float WallThickness = 5;
+    public static float MinDetectionWallDistance = 100;
+    public static float MinDetectionJumpDistance = 20;
     public static float MinDetectionBoxLength = 15;
     public static float NumSecondUpdateEntityPosition = 2;
     public static float WallMaxDistance = 99999;
     public static float ObstacleMaxDistance = 10;
     public static float CrowdlMaxDistance = 10;
     public static float MaxSpeedWander = 25;
-    public static float MaxSpeedJump = 32;
+    public static float MaxSpeedJump = 50;
     public static float MaxSpeedAttention = 40;
-    public static float MaxSpeedMoving = 120;
+    public static float MaxSpeedMoving = 100;
     public static float MaxSpeedFlee = 150;
     public static float MaxAlertDistance = 50;
 
@@ -113,6 +115,7 @@ public class Config {
     public static List<string> LevelList()
     {
         List<string> dict = new List<string>();
+        dict.Add("level00.xml");
         dict.Add("level01.xml");
         dict.Add("level2way01.xml");
         dict.Add("levelbig01.xml");

@@ -48,7 +48,9 @@ public class MinorSpawner : CharacterSpawner
             m.FSM.SetCurrentState(MinorIdleState.Instance);
             m.FSM.SetGlobalState(MinorGlobalState.Instance);
             MinorIdleState.Instance.Enter(m);
+            
             MinorGlobalState.Instance.Enter(m);
+            m.IsActive = true;
         }
 
         td=teamStruct.TeamDict[CharType.MinorSpear];
@@ -61,6 +63,7 @@ public class MinorSpawner : CharacterSpawner
             m.FSM.SetGlobalState(MinorGlobalState.Instance);
             MinorIdleState.Instance.Enter(m);
             MinorGlobalState.Instance.Enter(m);
+            m.IsActive = true;
         }
         /*
         td=teamStruct.TeamDict[CharType.MinorMagic];

@@ -23,6 +23,7 @@ public class ObstacleDesc
     public string assetPath;
     public Vector3 pos;
     public Quaternion rot;
+    public ObstacleData data;
 }
 
 [Serializable]
@@ -68,54 +69,13 @@ public class LevelCreater : MonoBehaviour {
     public Vector2 heightmapUVOffset;
     public Rect heightmapSampleRect;
 
-    List<GameObject> cubelist;
-
-	// Use this for initialization
-
-	void Start () {
-        cubelist = new List<GameObject>();
-	}
-    
-    void DisplaysCellSpacePartition()
-    {
-        if (cubelist.Count > 0)
-        {
-            foreach (GameObject o in cubelist)
-            {
-                UnityEngine.Object.Destroy(o);
-            }
-            cubelist.Clear();
-        }
-        else
-        {
-            float CellSizeX = SpaceSize.x / NumCell.x;
-            float CellSizeY = SpaceSize.y / NumCell.y;
-
-
-            float sy = StartPos.y;
-            for (int y = 0; y < NumCell.y; ++y)
-            {
-                float sx = StartPos.x;
-                for (int x = 0; x < NumCell.x; ++x)
-                {
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.transform.position = new Vector3(sx + CellSizeX / 2, 0, sy + CellSizeY / 2);
-                    cube.transform.localScale = new Vector3(CellSizeX, 1, CellSizeY);
-                    sx += CellSizeX;
-                    cubelist.Add(cube);
-                }
-                sy += CellSizeY;
-            }
-        }
-    }
-
-
     LevelDesc GetLevelDescs()
     {
         LevelDesc ld = new LevelDesc();
         ld.Walls = new List<WallDesc>();
         ld.Obstacles = new List<ObstacleDesc>();
         ld.MapObjects = new List<MapDesc>();
+        
         Transform enterTF = GameObject.Find("EnterPos").transform;
         ld.EnterPos = new Vector2(enterTF.position.x, enterTF.position.z);
         Transform exitTF = GameObject.Find("ExitPos").transform;
@@ -151,7 +111,11 @@ public class LevelCreater : MonoBehaviour {
             od.pos = obstacleTF.position;
             od.rot = obstacleTF.rotation;
 
+           
+            od.data = obstacleTF.GetComponent<Obstacle>().Data;
+            Debug.Log(od.data);
             ld.Obstacles.Add(od);
+
         }
 
         GameObject mapRoot = GameObject.Find("MapRoot");
@@ -173,7 +137,6 @@ public class LevelCreater : MonoBehaviour {
     {
         string name = System.IO.Path.GetFileNameWithoutExtension(filepath);
         string[] folders = filepath.Trim(Path.AltDirectorySeparatorChar).Split(Path.AltDirectorySeparatorChar);
-        Debug.Log(folders.Length);
         string combinePath = "";
         int resourceIndex = folders.Length;
         for (int i = 0; i < folders.Length - 1; ++i)
@@ -196,7 +159,7 @@ public class LevelCreater : MonoBehaviour {
         return combinePath;
     }
 
-    void ExportLevelDesc(string fileName)
+    public void ExportLevelDesc(string fileName)
     {
         LevelDesc ld = GetLevelDescs();
         string dataFilePath = Application.streamingAssetsPath + "/" + fileName;
@@ -204,9 +167,13 @@ public class LevelCreater : MonoBehaviour {
         XmlUtils.CreateXML(dataFilePath, dataString);
     }
 
-    IEnumerator ExportHeightMap(string fileName)
+    public void ExportHeightMap(string fileName)
     {
-        yield return new WaitForEndOfFrame();
+        //yield return new WaitForEndOfFrame();
+        GameObject obstacleRoot = GameObject.Find("ObstacleRoot");
+        obstacleRoot.SetActive(false);
+        GameObject wallRoot = GameObject.Find("WallRoot");
+        wallRoot.SetActive(false);
         string dataFilePath = Application.streamingAssetsPath + "/" + fileName;
         Texture2D tex_heightmap = new Texture2D(HeightmapConfig.heightmapTextureSizeX, HeightmapConfig.heightmapTextureSizeY, TextureFormat.RGB24, false);
 
@@ -240,22 +207,9 @@ public class LevelCreater : MonoBehaviour {
         string rpcText = System.Convert.ToBase64String(bytes);
         Debug.Log(rpcText);
         File.WriteAllBytes(dataFilePath, bytes);
-        UnityEngine.Object.Destroy(tex_heightmap);
+        obstacleRoot.SetActive(true);
+        wallRoot.SetActive(true);
+        UnityEngine.Object.DestroyImmediate(tex_heightmap);
     }
 
-    void OnGUI()
-    {
-        if (GUI.Button(new Rect(10, 10, 200, 40), "Display Cell Space Partition"))
-        {
-            DisplaysCellSpacePartition();
-        }
-        if (GUI.Button(new Rect(10, 70, 200, 40), "Export Level Desc Xml"))
-        {
-            ExportLevelDesc(fileName);
-        }
-        if (GUI.Button(new Rect(10, 130, 200, 40), "Export HeightMap"))
-        {
-            StartCoroutine(ExportHeightMap(heightmap));
-        }
-    }  
 }

@@ -7,13 +7,7 @@ public class Spear : Projectile
     int endTimer = Config.TimeToDisappearAfterDead;
     public override void Shoot()
     {
-        MaxSpeed = m_WeaponDesc.ShootSpeed;
-        //float time = (m_Target.Pos - m_Shooter.Pos).magnitude / m_WeaponDesc.ShootSpeed;
-        //Vector2 targetPos = m_Target.Pos + m_Target.Velocity * time;
-        //Velocity = (targetPos - m_Shooter.Pos) / time;
-        
-        Velocity = (m_Target.Pos - m_Shooter.Pos).normalized * m_WeaponDesc.ShootSpeed;
-
+        m_Movement = new ForwardMovement(m_Target.GetWorldPosition(), m_Shooter.GetWorldPosition(), m_WeaponDesc.ShootSpeed);
     }
 
     public override void Hit()
@@ -28,20 +22,22 @@ public class Spear : Projectile
             m_End = true;
             gameObject.transform.parent = ent.gameObject.transform;
         }
-        float dis = (m_Target.Pos - Pos).sqrMagnitude;
-        if (dis < 2.0f)
+
+        if (((ForwardMovement)Movement).IsArrived())
         {
             m_Impacted = false;
             m_ImpactPoint = Pos;
             m_End = true;
         }
-        dis = (m_Shooter.Pos - Pos).sqrMagnitude;
-        if (dis > m_WeaponDesc.MaxHitRange* m_WeaponDesc.MaxHitRange)
+
+        float ground_height = World.GetHeight(Pos);
+        if (Pos.y <= ground_height)
         {
             m_Impacted = false;
             m_ImpactPoint = Pos;
-            m_End = true;
+            m_End = true;       
         }
+
 
     }
 
@@ -53,8 +49,12 @@ public class Spear : Projectile
         {
             if (e.HitTest(Pos, BRadius) && e != m_Shooter)
             {
-                result = true;
-                ent = e;
+                float deltaHeight = Height - e.Height;
+                if (deltaHeight < BRadius + e.BRadius)
+                {
+                    result = true;
+                    ent = e;
+                }
             }
         }
         return result;
@@ -63,7 +63,7 @@ public class Spear : Projectile
     public override void Update()
     {
         base.Update();
-
+        //keep object a while after it impacted.
         if (m_End)
         {
             endTimer -= 1;
@@ -72,10 +72,6 @@ public class Spear : Projectile
                 World.Projectiles().Remove(this);
                 Destroy(gameObject, 0);
             }
-        }
-        else
-        {
-            gameObject.transform.position = new Vector3(m_Pos.x, 0, m_Pos.y);
         }
     }
 

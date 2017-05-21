@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class Projectile : MovingEntity
+public class Projectile : BaseEntity
 {
     public Character m_Shooter;
     public Character m_Target;
@@ -12,6 +12,16 @@ public class Projectile : MovingEntity
     protected Vector2 m_ImpactPoint;
     
     protected bool m_End;
+
+    protected MovementInterface m_Movement;
+    public MovementInterface Movement
+    {
+        get
+        { 
+            return m_Movement; 
+        }
+    }
+
 
     public void Init(Character shooter, Character target, WeaponDesc weaponDesc)
     {
@@ -32,13 +42,17 @@ public class Projectile : MovingEntity
 	// Update is called once per frame
     public virtual void Update()
     {
-
         if (!m_End)
         {
+            m_Movement.UpdateTransform();
+            Vector3 position = m_Movement.GetPosition();
+            Pos = new Vector2(position.x,position.z);
+            Height = position.y;
             Hit();
-            base.Update();
         }
-
+        gameObject.transform.position = m_Movement.GetPosition();
+        gameObject.transform.rotation = m_Movement.GetRotation();
+        base.Update();
 	}
 }
 
