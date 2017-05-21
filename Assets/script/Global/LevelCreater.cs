@@ -39,8 +39,8 @@ public class MapDesc
 [Serializable]
 public class LevelDesc
 {
-    public Vector2 EnterPos;
-    public Vector2 ExitPos;
+    public Vector3 EnterPos;
+    public Vector3 ExitPos;
 
     public Vector2 NumCell;
     public Vector2 SpaceSize;
@@ -77,9 +77,9 @@ public class LevelCreater : MonoBehaviour {
         ld.MapObjects = new List<MapDesc>();
         
         Transform enterTF = GameObject.Find("EnterPos").transform;
-        ld.EnterPos = new Vector2(enterTF.position.x, enterTF.position.z);
+        ld.EnterPos = enterTF.position;
         Transform exitTF = GameObject.Find("ExitPos").transform;
-        ld.ExitPos = new Vector2(exitTF.position.x, exitTF.position.z);
+        ld.ExitPos = exitTF.position;
         ld.NumCell = NumCell;
         ld.SpaceSize = SpaceSize;
         ld.StartPos = StartPos;

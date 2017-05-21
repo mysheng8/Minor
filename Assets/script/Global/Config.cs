@@ -117,9 +117,6 @@ public class Config {
         List<string> dict = new List<string>();
         dict.Add("level00.xml");
         dict.Add("level01.xml");
-        dict.Add("level2way01.xml");
-        dict.Add("levelbig01.xml");
-        dict.Add("leveldown01.xml");
         dict.Add("levelup01.xml");
         return dict;
     }
@@ -133,6 +130,6 @@ public class HeightmapConfig
     public static float heightmapSampleUnitSizeX = 2.0f;
     public static float heightmapSampleUnitSizeY = 2.0f;
     public static float heightmapMaxHeightDistance = 100.0f;
-    public static int heightmapTextureSizeX = 512;
-    public static int heightmapTextureSizeY = 512;
+    public static int heightmapTextureSizeX = 1024;
+    public static int heightmapTextureSizeY = 1024;
 }

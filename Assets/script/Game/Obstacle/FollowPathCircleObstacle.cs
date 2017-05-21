@@ -34,7 +34,7 @@ public class FollowPathCircleObstacle : MovingObstacle
         if (World.isEditorMode)
             m_Movement = new FollowPathMovement(Vector3.zero, m_Data.Speed, m_Data.PointList, m_Data.IsReturn);
         else
-            m_Movement = new FollowPathMovement(new Vector3(m_Level.StartPos().x, 0, m_Level.StartPos().y), m_Data.Speed, m_Data.PointList, m_Data.IsReturn);
+            m_Movement = new FollowPathMovement(m_Level.EnterPos(), m_Data.Speed, m_Data.PointList, m_Data.IsReturn);
         m_Collision = new CircleCollision(Pos, BRadius);    
     }
 

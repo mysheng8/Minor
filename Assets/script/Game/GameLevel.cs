@@ -6,9 +6,8 @@ using System.IO;
 
 public class GameLevel
 {
-
     LevelDesc m_ld;
-    Vector2 m_LevelOffset;
+    Vector3 m_LevelOffset;
 
     CellSpacePartition m_Partition;
 
@@ -35,19 +34,43 @@ public class GameLevel
     }
 
 
-    public Vector2 ExitPos()
+    public Vector3 ExitPos()
     {
         return m_ld.ExitPos + m_LevelOffset;
     }
 
-    public Vector2 StartPos()
+    public Vector3 EnterPos()
     {
         return m_ld.EnterPos + m_LevelOffset;
     }
 
 
-	// Use this for initialization
-    public void Init(Vector2 offsePos, string fileName)
+    public Vector2 NumCell
+    {
+        get
+        {
+            return m_ld.NumCell;
+        }    
+    }
+
+    public Vector2 SpaceSize
+    {
+        get
+        {
+            return m_ld.SpaceSize;
+        }
+    }
+
+    public Vector2 StartPos
+    {
+        get
+        {
+            return m_ld.StartPos;
+        }
+    }
+
+    // Use this for initialization
+    public void Init(Vector3 offsePos, string fileName)
     {
         m_mapObjects = new List<GameObject>();
         m_Walls = new List<Wall>();
@@ -93,7 +116,7 @@ public class GameLevel
     {
         foreach (MapDesc m in m_ld.MapObjects)
         {
-            Vector3 pos = m.pos + new Vector3(m_LevelOffset.x, 0, m_LevelOffset.y);
+            Vector3 pos = m.pos + m_LevelOffset;
             Quaternion rot = m.rot;
             GameObject res = Resources.Load(m.assetPath) as GameObject;
             GameObject pref = UnityEngine.Object.Instantiate(res, pos, rot) as GameObject;
@@ -102,7 +125,7 @@ public class GameLevel
 
         foreach (WallDesc w in m_ld.Walls)
         {
-            Vector3 pos = w.pos + new Vector3(m_LevelOffset.x, 0, m_LevelOffset.y);
+            Vector3 pos = w.pos + m_LevelOffset;
             Quaternion rot = w.rot;
             GameObject res = Resources.Load(w.assetPath) as GameObject;
             GameObject pref = UnityEngine.Object.Instantiate(res, pos, rot) as GameObject;
@@ -112,7 +135,7 @@ public class GameLevel
 
         foreach (ObstacleDesc o in m_ld.Obstacles)
         {
-            Vector3 pos = o.pos + new Vector3(m_LevelOffset.x, 0, m_LevelOffset.y);
+            Vector3 pos = o.pos + m_LevelOffset;
             Quaternion rot = o.rot;
             GameObject res = Resources.Load(o.assetPath) as GameObject;
             GameObject pref = UnityEngine.Object.Instantiate(res, pos, rot) as GameObject;
@@ -133,11 +156,11 @@ public class GameLevel
     public float GetHeight(Vector2 pos)
     {
         int sampleX = (int)((pos.x - m_LevelOffset.x - m_ld.heightmapSampleRect.min.x) / HeightmapConfig.heightmapSampleUnitSizeX + m_ld.heightmapUVOffset.x);
-        int sampleY = (int)((pos.y - m_LevelOffset.y - m_ld.heightmapSampleRect.min.y) / HeightmapConfig.heightmapSampleUnitSizeY + m_ld.heightmapUVOffset.y);
+        int sampleY = (int)((pos.y - m_LevelOffset.z - m_ld.heightmapSampleRect.min.y) / HeightmapConfig.heightmapSampleUnitSizeY + m_ld.heightmapUVOffset.y);
 
         Color color = m_Heightmap.GetPixel(sampleX, sampleY);
 
-        return color.r*HeightmapConfig.heightmapMaxHeightDistance;
+        return color.r*HeightmapConfig.heightmapMaxHeightDistance+ m_LevelOffset.y;
     }
 
     public void RemoveAll()

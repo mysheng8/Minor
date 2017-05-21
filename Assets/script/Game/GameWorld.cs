@@ -81,13 +81,13 @@ public class GameWorld : MonoBehaviour {
         GameLevel next = new GameLevel();
         if (isFirst)
         {
-            next.Init(new Vector2(-60,0), Config.LevelList()[0]);
+            next.Init(new Vector3(-60,0,0), Config.LevelList()[0]);
         }
         else
         {
-            int n = Config.LevelList().Count;
-            int i = (int)(Random.value*n);
-            next.Init(m_currentLevel.ExitPos(), Config.LevelList()[1]);
+            int n = Config.LevelList().Count-1;
+            int i = (int)(Random.value*n)+1;
+            next.Init(m_currentLevel.ExitPos(), Config.LevelList()[i]);
         }
         return next;   
     }
@@ -97,7 +97,7 @@ public class GameWorld : MonoBehaviour {
         if (!isEditorMode)
         {
             m_currentLevel = spawnNextLevel(true);
-            m_previousLevel = m_currentLevel;
+            m_previousLevel = null;
             m_nextLevel = spawnNextLevel(false);
             m_currentLevel.SetActive();
             m_camera = GameObject.Find("CameraRoot").GetComponent<GameCamera>();
@@ -134,9 +134,29 @@ public class GameWorld : MonoBehaviour {
 	}
     public void OutOfMap()
     {
-
         if (m_currentLevel.IsExceedCellSpace(m_camera.GetTargetPos()))
         {
+            if(m_previousLevel!=null)
+                m_previousLevel.RemoveAll();
+            m_previousLevel = m_currentLevel;
+            m_currentLevel = m_nextLevel;
+            m_nextLevel = spawnNextLevel(false);
+            Vector2 outPos = Vector2.zero;
+            foreach (Character c in m_teamA.Members())
+            {
+                if (m_currentLevel.IsBehindCellSpace(c.Pos, out outPos))
+                    c.Pos = outPos;
+                m_currentLevel.Partition().AddEntity(c);
+            }
+        }
+        m_currentLevel.SetActive();
+        if(m_previousLevel != null)
+            m_previousLevel.SetDeActive();
+
+        /*
+        if (m_currentLevel.IsExceedCellSpace(m_camera.GetTargetPos()))
+        {
+
             m_currentLevel = m_nextLevel;
             Vector2 outPos = Vector2.zero;
             foreach (Character c in m_teamA.Members())
@@ -156,6 +176,7 @@ public class GameWorld : MonoBehaviour {
         }
         m_currentLevel.SetActive();
         m_previousLevel.SetDeActive();
+        */
     }
 
     public float GetHeight(Vector2 pos)
@@ -167,7 +188,9 @@ public class GameWorld : MonoBehaviour {
         }
         else if (m_currentLevel.IsBehindMap(pos))
         {
-            return m_previousLevel.GetHeight(pos);
+            if (m_previousLevel != null)
+                return m_previousLevel.GetHeight(pos);
+            return 0;
         }
         else 
         {

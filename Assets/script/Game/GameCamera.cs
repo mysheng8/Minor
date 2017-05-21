@@ -13,16 +13,15 @@ public enum CameraBehaviourType
 public class GameCamera : MonoBehaviour {
 
     GameCameraBehaviour m_CameraBehaviour;
-    MinorTeam m_team;
-
-    Vector2 m_CamPos;
-    Vector2 m_TargetPos;
-    public Vector2 GetCameraPos()
+    MinorTeam m_Team;
+    Vector3 m_CamPos;
+    Vector3 m_TargetPos;
+    public Vector3 GetCameraPos()
     {
         return m_CamPos;
     }
 
-    public Vector2 GetTargetPos()
+    public Vector3 GetTargetPos()
     {
         return m_TargetPos;
     }
@@ -48,16 +47,16 @@ public class GameCamera : MonoBehaviour {
 
     // Use this for initialization
     void Awake () {
-        m_CamPos = Vector2.zero;
-        m_TargetPos = Vector2.zero;
+        m_CamPos = Vector3.zero;
+        m_TargetPos = Vector3.zero;
         m_CameraBehaviour = LineGameCameraBehaviour.Instance;
-        m_team=GameWorld.Instance.GetTeam();
-	}
+        m_Team = GameWorld.Instance.GetTeam();
+    }
 	
 	// Update is called once per frame
 	void Update () {
-        m_CameraBehaviour.RolingMap(m_team, ref m_TargetPos, ref m_CamPos);
-        gameObject.transform.position = new Vector3(m_CamPos.x, 0, m_CamPos.y);
+        m_CameraBehaviour.RolingMap(m_Team, ref m_TargetPos, ref m_CamPos);
+        gameObject.transform.position = m_CamPos;
 
     }
 }
@@ -66,8 +65,8 @@ public class GameCamera : MonoBehaviour {
 public class GameCameraBehaviour
 {
     public float m_RollingSpeed = 0;
-    public Vector2 m_RollingDir = Vector2.zero;
-    public virtual void RolingMap(MinorTeam team, ref Vector2 tarPos, ref Vector2 camPos) {}
+    public Vector3 m_RollingDir = Vector3.zero;
+    public virtual void RolingMap(MinorTeam team, ref Vector3 tarPos, ref Vector3 camPos) {}
     public bool CheckGuiRaycastObjects()
     {
         PointerEventData eventData = new PointerEventData(EventSystem.current);
@@ -96,20 +95,31 @@ public class LineGameCameraBehaviour : GameCameraBehaviour
         }
     }
 
-    public override void RolingMap(MinorTeam team, ref Vector2 tarPos, ref Vector2 camPos)  
+    public override void RolingMap(MinorTeam team, ref Vector3 tarPos, ref Vector3 camPos)  
     {
         if (Input.GetMouseButton(0))
         {
             if(!CheckGuiRaycastObjects())
             {
-                tarPos = team.GetMoveTarget();
+                Vector2 hit = team.GetMoveTarget();
+                float height = GameWorld.Instance.GetHeight(hit);
+                tarPos = new Vector3(hit.x, height, hit.y);
             }
         }
         m_RollingDir = (tarPos - camPos).normalized;
         m_RollingSpeed = (tarPos - camPos).magnitude / 1.5f;
         if (m_RollingSpeed > Config.gCameraMovementMaxSpeed)
             m_RollingSpeed = Config.gCameraMovementMaxSpeed;
-        camPos += new Vector2(m_RollingDir.x * m_RollingSpeed * Time.deltaTime, m_RollingDir.y * m_RollingSpeed * Time.deltaTime);
+        if (GameWorld.Instance.CurrentLevel.IsBehindMap(camPos - new Vector3(Screen.width / 2, 0, 0)))
+        {
+            if (m_RollingDir.x < 0)
+            {
+                m_RollingDir.x = 0;
+                m_RollingDir=m_RollingDir.normalized;
+            }
+        }
+        camPos += m_RollingDir * m_RollingSpeed * Time.deltaTime;
+
     }
 }
 
@@ -128,20 +138,30 @@ public class WallGameCameraBehaviour : GameCameraBehaviour
         }
     }
 
-    public override void RolingMap(MinorTeam team, ref Vector2 tarPos, ref Vector2 camPos)  
+    public override void RolingMap(MinorTeam team, ref Vector3 tarPos, ref Vector3 camPos)  
     {
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButton(0))
         {
             if (!CheckGuiRaycastObjects())
             {
-                tarPos = team.GetMoveTarget();
+                Vector2 hit = team.GetMoveTarget();
+                float height = GameWorld.Instance.GetHeight(hit);
+                tarPos = new Vector3(hit.x, height, hit.y);
             }
         }
         m_RollingDir = (tarPos - camPos).normalized;
         m_RollingSpeed = (tarPos - camPos).magnitude / 1.5f;
         if (m_RollingSpeed > Config.gCameraMovementMaxSpeed)
             m_RollingSpeed = Config.gCameraMovementMaxSpeed;
-        camPos += new Vector2(m_RollingDir.x * m_RollingSpeed * Time.deltaTime, m_RollingDir.y * m_RollingSpeed * Time.deltaTime);
+        if (GameWorld.Instance.CurrentLevel.IsBehindMap(camPos - new Vector3(Screen.width / 2, 0, 0)))
+        {
+            if (m_RollingDir.x < 0)
+            {
+                m_RollingDir.x = 0;
+                m_RollingDir = m_RollingDir.normalized;
+            }
+        }
+        camPos += m_RollingDir * m_RollingSpeed * Time.deltaTime;
     }
 }
 
@@ -160,19 +180,29 @@ public class BallGameCameraBehaviour : GameCameraBehaviour
         }
     }
 
-    public override void RolingMap(MinorTeam team,ref  Vector2 tarPos, ref Vector2 camPos)  
+    public override void RolingMap(MinorTeam team,ref  Vector3 tarPos, ref Vector3 camPos)  
     {
         if (Input.GetMouseButtonUp(0))
         {
             if (!CheckGuiRaycastObjects())
             {
-                tarPos = team.GetMoveTarget();
+                Vector2 hit = team.GetMoveTarget();
+                float height = GameWorld.Instance.GetHeight(hit);
+                tarPos = new Vector3(hit.x, height, hit.y);
             }
         }
         m_RollingDir = (tarPos - camPos).normalized;
         m_RollingSpeed = (tarPos - camPos).magnitude / 1.5f;
         if (m_RollingSpeed > Config.gCameraMovementMaxSpeed)
             m_RollingSpeed = Config.gCameraMovementMaxSpeed;
-        camPos += new Vector2(m_RollingDir.x * m_RollingSpeed * Time.deltaTime, m_RollingDir.y * m_RollingSpeed * Time.deltaTime);
+        if (GameWorld.Instance.CurrentLevel.IsBehindMap(camPos - new Vector3(Screen.width / 2, 0, 0)))
+        {
+            if (m_RollingDir.x < 0)
+            {
+                m_RollingDir.x = 0;
+                m_RollingDir = m_RollingDir.normalized;
+            }
+        }
+        camPos += m_RollingDir * m_RollingSpeed * Time.deltaTime;
     }
 }
