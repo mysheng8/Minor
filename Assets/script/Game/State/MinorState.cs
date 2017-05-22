@@ -166,10 +166,10 @@ public class MinorJumpState : State<Character>
                 {
 
                     Vector2 pushOffset = curEntity.CalculatePenetrationConstraint(m.Movement.Pos, m.BRadius);
-                    /*
+                    
                     Vector3 pos = m.Movement.GetPosition();
                     Vector3 posMove = new Vector3(pushOffset.x, 0, pushOffset.y);
-                    Debug.DrawLine(pos, pos + posMove);*/
+                    Debug.DrawLine(pos, pos + posMove);
                     if (!curEntity.IsJumpable && !m.OnGround)
                     {
                         m.Movement.Pos += pushOffset;

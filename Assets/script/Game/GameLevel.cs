@@ -79,7 +79,7 @@ public class GameLevel
         m_LevelOffset = offsePos;
         LoadDescXML(fileName);
         LoadHeightmap(m_ld.Heightmap);
-        m_Partition.Init(m_ld.SpaceSize.x, m_ld.SpaceSize.y, (int)m_ld.NumCell.x, (int)m_ld.NumCell.y, m_ld.StartPos.x, m_ld.StartPos.y, m_LevelOffset.x, m_LevelOffset.y);
+        m_Partition.Init(m_ld.SpaceSize.x, m_ld.SpaceSize.y, (int)m_ld.NumCell.x, (int)m_ld.NumCell.y, m_ld.StartPos.x, m_ld.StartPos.y, m_LevelOffset.x, m_LevelOffset.z);
         AddEntitys();
     }
 

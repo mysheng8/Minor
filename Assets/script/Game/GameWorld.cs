@@ -103,12 +103,12 @@ public class GameWorld : MonoBehaviour {
             m_camera = GameObject.Find("CameraRoot").GetComponent<GameCamera>();
             m_camera.SetCameraBehaviourType(CameraBehaviourType.Line);
             TeamStruct mts = new TeamStruct();
-            mts.TeamDict.Add(CharType.MinorKnife, new TeamDesc(Config.MinorKnifeHealth, 4, 15, WeaponType.Wpn_Knife));
-            mts.TeamDict.Add(CharType.MinorSpear, new TeamDesc(Config.MinorSpearHealth, 4, 6, WeaponType.Wpn_Spear));
+            mts.TeamDict.Add(CharType.MinorKnife, new TeamDesc(Config.MinorKnifeHealth, 4, 10, WeaponType.Wpn_Knife));
+            mts.TeamDict.Add(CharType.MinorSpear, new TeamDesc(Config.MinorSpearHealth, 4, 10, WeaponType.Wpn_Spear));
             //mts.TeamDict.Add(CharType.MinorMagic, new TeamDesc(Config.MinorMagicHealth, 2, 5, WeaponType.Wpn_Magic));
 
 
-            m_teamA = new MinorTeam(mts, 21);
+            m_teamA = new MinorTeam(mts, 20);
             m_teamA.Spawner = new MinorSpawner();
             m_teamA.OnStart();
 

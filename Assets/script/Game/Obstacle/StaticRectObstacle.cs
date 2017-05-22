@@ -9,13 +9,13 @@ using UnityEngine;
 [Serializable]
 public class StaticRectObstacleData : ObstacleData
 {
-    [HideInInspector]
+    //[HideInInspector]
     public float xMin;
-    [HideInInspector]
+    //[HideInInspector]
     public float yMin;
-    [HideInInspector]
+    //[HideInInspector]
     public float width;
-    [HideInInspector]
+    //[HideInInspector]
     public float height;
 }
 

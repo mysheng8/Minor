@@ -123,8 +123,9 @@ public class yMath
         return result;    
     }
 
-    public static Vector2 CalculateRectOverlay(Rect rect, float radiusA, Vector2 centor, float radiusB)
+	public static Vector2 CalculateRectOverlay(Rect rect, float radiusA, Vector2 centor, float radiusB)
     {
+		
         Vector2 result = Vector2.zero;
         //return Vector2.zero;
         float range = radiusA + radiusB;
@@ -180,35 +181,41 @@ public class yMath
 
                 float xMindistance = rect.xMin - centor.x;
 
-                float xMaxdistance = rect.xMax - centor.y;
+                float xMaxdistance = rect.xMax - centor.x;
 
                 float clostdis = 999;
-                float overlap=0,distance=1;
+                float overlap=0,distance=0;
+				bool isX=false;
                 if (Mathf.Abs(yMindistance) < clostdis)
                 {
                     clostdis = Mathf.Abs(yMindistance);
-                    overlap = radiusA + radiusB - clostdis;
+                    overlap = radiusA + radiusB + clostdis;
                     distance = yMindistance;
                 }
                 if (Mathf.Abs(yMaxdistance) < clostdis)
                 {
                     clostdis = Mathf.Abs(yMaxdistance);
-                    overlap = radiusA + radiusB - clostdis;
+                    overlap = radiusA + radiusB + clostdis;
                     distance = yMaxdistance;
                 }
                 if (Mathf.Abs(xMindistance) < clostdis)
                 {
                     clostdis = Mathf.Abs(xMindistance);
-                    overlap = radiusA + radiusB - clostdis;
+                    overlap = radiusA + radiusB + clostdis;
                     distance = xMindistance;
+					isX = true;
                 }
                 if (Mathf.Abs(xMaxdistance) < clostdis)
                 {
                     clostdis = Mathf.Abs(xMaxdistance);
-                    overlap = radiusA + radiusB - clostdis;
+                    overlap = radiusA + radiusB + clostdis;
                     distance = xMaxdistance;
+					isX = true;
                 }
-                return new Vector2(0, Mathf.Abs(distance) / distance * overlap);
+				if(isX)
+					return new Vector2(Mathf.Abs(distance) / distance * overlap,0);
+				else
+                	return new Vector2(0, Mathf.Abs(distance) / distance * overlap);
             }
         }
         return Vector2.zero;
