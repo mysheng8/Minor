@@ -33,7 +33,10 @@ public abstract class  Obstacle : BaseEntity
 
     public override bool HitTest(Vector2 entityPos, float entityRadius)
     {
-        return m_Collision.HitTest(entityPos, entityRadius);
+        if (m_Active)
+            return m_Collision.HitTest(entityPos, entityRadius);
+        else
+            return false;
     }
 
     public override Vector2 CalculatePenetrationConstraint(Vector2 entityPos, float entityRadius)

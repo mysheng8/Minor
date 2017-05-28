@@ -345,7 +345,7 @@ public class MinorIdleState : State<Character>
                     Debug.DrawLine(pos, pos + posMove);*/
                     if (pushOffset.magnitude > 0)
                     {
-                        if (curEntity.IsJumpable)
+						if (curEntity.IsJumpable&&m.Movement.Speed>Config.MaxSpeedJumpThreshold)
                         {
                             m.FSM.ChangeState(MinorJumpState.Instance);
                         }
@@ -440,9 +440,9 @@ public class MinorMovingState : State<Character>
         --entity.Attention;
         if (entity.Attention <= 0)
             entity.FSM.ChangeState(MinorIdleState.Instance);
-        
+        /*
         if (entity.Steering.HasArrived())
-            entity.FSM.ChangeState(MinorDefenceState.Instance);
+            entity.FSM.ChangeState(MinorDefenceState.Instance);*/
 
         Team t = entity.World.GetOpponent(entity.Team);
         if (entity.Weapon.FindEnemy(t.Members()))
@@ -475,7 +475,7 @@ public class MinorMovingState : State<Character>
 
                     if (pushOffset.magnitude > 0)
                     {
-                        if (curEntity.IsJumpable)
+						if (curEntity.IsJumpable&&m.Movement.Speed>Config.MaxSpeedJumpThreshold)
                         {
                             m.FSM.ChangeState(MinorJumpState.Instance);
                         }

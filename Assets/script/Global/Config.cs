@@ -22,6 +22,7 @@ public class Config {
     public static float MaxSpeedMoving = 100;
     public static float MaxSpeedFlee = 150;
     public static float MaxAlertDistance = 50;
+	public static float MaxSpeedJumpThreshold = 80;
 
     public static float TelegramEqualDelteTime = 0.3f;
 

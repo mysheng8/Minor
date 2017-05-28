@@ -77,8 +77,8 @@
      <Compile Include="Assets\script\Game\Superior.cs" />
      <Compile Include="Assets\script\Game\Team.cs" />
      <Compile Include="Assets\script\Game\TeamFormation.cs" />
+     <Compile Include="Assets\script\Game\Trigger\RectKillTrigger.cs" />
      <Compile Include="Assets\script\Game\Trigger\Trigger.cs" />
-     <Compile Include="Assets\script\Game\Trigger\TriggerRegion.cs" />
      <Compile Include="Assets\script\Game\Wall.cs" />
      <Compile Include="Assets\script\Game\Weapon.cs" />
      <Compile Include="Assets\script\Global\CellSpacePartition.cs" />

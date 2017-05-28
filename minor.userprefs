@@ -1,15 +1,16 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\script\Game\GameWorld.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\script\Global\Config.cs">
     <Files>
-      <File FileName="Assets\script\Game\Obstacle\CollisionShapeInterface.cs" Line="67" Column="1" />
+      <File FileName="Assets\script\Game\Obstacle\CollisionShapeInterface.cs" Line="1" Column="1" />
       <File FileName="Assets\script\Game\Obstacle\StaticRectObstacle.cs" Line="1" Column="1" />
-      <File FileName="Assets\script\Game\Obstacle\Obstacle.cs" Line="41" Column="1" />
-      <File FileName="Assets\script\Global\yMath.cs" Line="221" Column="1" />
-      <File FileName="Assets\script\Game\GameWorld.cs" Line="111" Column="44" />
-      <File FileName="Assets\script\Game\State\MinorState.cs" Line="470" Column="1" />
-      <File FileName="Assets\script\Game\Minor.cs" Line="18" Column="1" />
-      <File FileName="Assets\script\Game\Character.cs" Line="164" Column="1" />
+      <File FileName="Assets\script\Game\Obstacle\Obstacle.cs" Line="1" Column="1" />
+      <File FileName="Assets\script\Global\yMath.cs" Line="1" Column="1" />
+      <File FileName="Assets\script\Game\GameWorld.cs" Line="1" Column="1" />
+      <File FileName="Assets\script\Game\State\MinorState.cs" Line="482" Column="29" />
+      <File FileName="Assets\script\Game\Minor.cs" Line="1" Column="1" />
+      <File FileName="Assets\script\Game\Character.cs" Line="1" Column="1" />
+      <File FileName="Assets\script\Global\Config.cs" Line="25" Column="47" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

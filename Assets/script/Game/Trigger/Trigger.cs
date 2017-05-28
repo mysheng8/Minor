@@ -1,40 +1,64 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Serialization;
+using System.IO;
 using UnityEngine;
 
-public class Trigger : MonoBehaviour 
+
+[Serializable]
+public class TriggerData
 {
-    TriggerRegion m_RegionOfInfluence;
+    [HideInInspector]
+    public float BRadius;
+}
+
+
+public abstract class Trigger : BaseEntity 
+{
+    CollisionShapeInterface m_RegionOfInfluence;
 
     bool m_RemoveFromGame;
-    bool m_Active;
 
-    public void SetToBeRemovedFromGame() { m_RemoveFromGame = false; }
-    public void SetInactive() { m_Active = false; }
-    public void SetActive() { m_Active = true; }
-    public bool isTouchingTrigger(Vector2 EntityPos, float EntityRadius)
+    public void Awake()
+    {
+        base.Awake();
+        EType = EntityType.Tigger;
+        IsStatic = true;
+        IsNonPenetrationConstraint = false;
+        m_Pos = new Vector2(transform.position.x, transform.position.z);
+    }
+
+    public override bool HitTest(Vector2 entityPos, float entityRadius)
     {
         if (m_Active)
-            return m_RegionOfInfluence.isTouching(EntityPos, EntityRadius);
+            return m_RegionOfInfluence.HitTest(entityPos, entityRadius);
         else
             return false;
     }
-    public bool isBeRemoved() { return m_RemoveFromGame; }
-    public bool isActive() { return m_Active; }
 
-    public virtual void Try(Character entity){}
-        
+    public virtual void InitData(TriggerData data, GameLevel level) { }
+    public abstract TriggerData Data { get; }
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public bool RemoveFromGame
+    {
+        get
+        { 
+            return m_RemoveFromGame;
+        }
+        set
+        {
+            m_RemoveFromGame = value;
+        }
+    }
+
+    public delegate void TryTrigger(Character entity);
+    public event TryTrigger trytrigger;
 }
+
+
+
 
 public class Respawning_Trigger: Trigger
 {
@@ -43,15 +67,15 @@ public class Respawning_Trigger: Trigger
 
     void Deactive()
     {
-        SetInactive();
+        IsActive=false;
         m_RemainingNumUpdatesRespawn = m_NumUpdateBetweenRespawns;
     }
 
     void Update()
     {
-        if ((--m_RemainingNumUpdatesRespawn) <= 0 && !isActive())
+        if ((--m_RemainingNumUpdatesRespawn) <= 0 && !IsActive)
         {
-            SetActive();
+            IsActive = true;
         }
     }
 }
@@ -63,7 +87,7 @@ public class LimitedLifetime_Trigger : Trigger
     {
         if (--m_Lifetime <= 0)
         {
-            SetToBeRemovedFromGame();
+            RemoveFromGame=true;
         }
     }
 }
@@ -76,11 +100,11 @@ public class Interval_Trigger : Trigger
     int m_RemainingNumUpdatesUntilRespawn;
     void Update()
     {
-        if (isActive())
+        if (IsActive)
         {
             if (--m_Lifetime <= 0)
             {
-                SetInactive();
+                IsActive = false;
                 m_RemainingNumUpdatesUntilRespawn = m_NumUpdateBetweenRespawns;
             }
         }
@@ -88,7 +112,7 @@ public class Interval_Trigger : Trigger
         {
             if ((--m_RemainingNumUpdatesUntilRespawn) <= 0)
             {
-                SetActive();
+                IsActive = true;
             }
         }
     }

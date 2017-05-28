@@ -8,7 +8,8 @@ public enum EntityType
     None,
     Character,
     Obstacle,
-    Wall
+    Wall,
+    Tigger
 }
 
 public class BaseEntity : MonoBehaviour {
