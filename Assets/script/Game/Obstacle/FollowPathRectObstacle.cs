@@ -4,39 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-/*
-[Serializable]
-public class SeVector3
-{
-    public float _x;
-    public float _y;
-    public float _z;
-    public SeVector3()
-    {
-        _x = 0;
-        _y = 0;
-        _z = 0;
-    }
-    public SeVector3(float x, float y, float z)
-    {
-        _x = x;
-        _y = y;
-        _z = z;
-    }
-
-    public SeVector3(Vector3 v)
-    {
-        _x = v.x;
-        _y = v.y;
-        _z = v.z;
-    }
-    public Vector3 GetVector3()
-    {
-        return new Vector3(_x, _y, _z);
-    }
-}*/
-
-
 
 [Serializable]
 public class FollowPathRectObstacleData : ObstacleData

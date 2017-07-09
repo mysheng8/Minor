@@ -97,8 +97,19 @@ public class MinorGlobalState : State<Character>
             }
         }
     }
-
+    void TryTriggers(Character m, List<BaseEntity> ContrainerOfEntities)
+    {
+        foreach (BaseEntity curEntity in ContrainerOfEntities)
+        {
+            if (curEntity.EType == EntityType.Tigger)
+            {
+                curEntity.TryTrigger(m);
+            }     
+        }
+    }
 }
+
+
 public class MinorJumpState : State<Character>
 {
     static MinorJumpState m_Instance;

@@ -18,16 +18,16 @@ public class BaseEntity : MonoBehaviour {
     protected Vector2 m_Pos = Vector2.zero;
     Vector2 m_LastPosInCellSpace;
     protected float m_Height = 0;
-    protected bool m_Static = true;
-    protected bool m_Damageable = false;
-    protected bool m_Tagged = false;
-    protected bool m_NonPenetrationConstraint = true;
-    protected bool m_Jumpable = false;
+    protected bool m_Static = true;//if need to update the position in cell space partition
+    protected bool m_Damageable = false;//if could be removed
+    protected bool m_Tagged = false;//if need to be calculate the group behaivor
+    protected bool m_NonPenetrationConstraint = true;//if need to calculate the penetration constraint
+    protected bool m_Jumpable = false;//if could be jumped over
     public float m_BRadius = 1.0f;
     protected GameWorld m_World;
     protected EntityType m_EType = EntityType.None;
     protected bool m_Active = false;
-
+    protected bool m_RemoveFromGame;
     public bool IsTagged
     { 
         get
@@ -112,6 +112,18 @@ public class BaseEntity : MonoBehaviour {
         }
     }
 
+    public bool RemoveFromGame
+    {
+        get
+        {
+            return m_RemoveFromGame;
+        }
+        set
+        {
+            m_RemoveFromGame = value;
+        }
+    }
+
     public GameWorld World
     {
         get
@@ -176,6 +188,10 @@ public class BaseEntity : MonoBehaviour {
     {
         if (m_World.isEditorMode)
             return;
+        if (m_RemoveFromGame)
+        {
+            Destroy(this);
+        }
         if(!IsStatic && IsActive)
         {
             //update position in Cell
@@ -189,6 +205,7 @@ public class BaseEntity : MonoBehaviour {
 
             m_World.Partition.CalculateNeighbors(m_Pos);   
         }
+
     }
 
     

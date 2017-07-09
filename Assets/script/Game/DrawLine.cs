@@ -57,7 +57,7 @@ public class DrawLine
 
     public void DrawEnd()
     {
-        lr.numPositions = 0;
+        lr.positionCount = 0;
     }
 
     public void Draw()
@@ -96,7 +96,7 @@ public class DrawLine
     void DisplayDraw()
     {
         int count = m_HitList.Count;
-        lr.numPositions = count;
+        lr.positionCount = count;
         lr.SetPosition(count-1, m_HitList[count-1]);
     }
 

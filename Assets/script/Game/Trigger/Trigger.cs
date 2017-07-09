@@ -14,12 +14,11 @@ public class TriggerData
     public float BRadius;
 }
 
-
 public abstract class Trigger : BaseEntity 
 {
-    CollisionShapeInterface m_RegionOfInfluence;
-
-    bool m_RemoveFromGame;
+    public delegate void TriggerHandler(BaseEntity Receiver);
+    public event TriggerHandler TriggerEvent;
+    public CollisionShapeInterface m_RegionOfInfluence;
 
     public void Awake()
     {
@@ -41,26 +40,18 @@ public abstract class Trigger : BaseEntity
     public virtual void InitData(TriggerData data, GameLevel level) { }
     public abstract TriggerData Data { get; }
 
-    public bool RemoveFromGame
+    public void TryTrigger(Character m)
     {
-        get
-        { 
-            return m_RemoveFromGame;
-        }
-        set
+        if (HitTest(m.Pos, m.BRadius))
         {
-            m_RemoveFromGame = value;
+            TriggerEvent.Invoke(m);
         }
     }
 
-    public delegate void TryTrigger(Character entity);
-    public event TryTrigger trytrigger;
 }
 
 
-
-
-public class Respawning_Trigger: Trigger
+public abstract class Respawning_Trigger: Trigger
 {
     int m_NumUpdateBetweenRespawns;
     int m_RemainingNumUpdatesRespawn;
@@ -73,6 +64,7 @@ public class Respawning_Trigger: Trigger
 
     void Update()
     {
+        base.Update();
         if ((--m_RemainingNumUpdatesRespawn) <= 0 && !IsActive)
         {
             IsActive = true;
@@ -80,11 +72,12 @@ public class Respawning_Trigger: Trigger
     }
 }
 
-public class LimitedLifetime_Trigger : Trigger
+public abstract class LimitedLifetime_Trigger : Trigger
 {
     int m_Lifetime;
     void Update()
     {
+        base.Update();
         if (--m_Lifetime <= 0)
         {
             RemoveFromGame=true;
@@ -92,14 +85,15 @@ public class LimitedLifetime_Trigger : Trigger
     }
 }
 
-public class Interval_Trigger : Trigger
+public abstract class Interval_Trigger : Trigger
 {
-    int m_Lifetime;
-    int m_RemainingLifetime;
-    int m_NumUpdateBetweenRespawns;
-    int m_RemainingNumUpdatesUntilRespawn;
+    protected int m_Lifetime;
+    protected int m_RemainingLifetime;
+    protected int m_NumUpdateBetweenRespawns;
+    protected int m_RemainingNumUpdatesUntilRespawn;
     void Update()
     {
+        base.Update();
         if (IsActive)
         {
             if (--m_Lifetime <= 0)

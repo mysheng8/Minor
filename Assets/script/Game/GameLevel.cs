@@ -14,6 +14,7 @@ public class GameLevel
     List<GameObject> m_mapObjects;
     List<Wall> m_Walls;
     List<Obstacle> m_Obstacles;
+    List<Trigger> m_Triggers;
 
     Texture2D m_Heightmap;
 
@@ -26,6 +27,11 @@ public class GameLevel
     public List<Obstacle> Obstacles()
     {
         return m_Obstacles;
+    }
+
+    public List<Trigger> Triggers()
+    {
+        return m_Triggers;
     }
 
     public CellSpacePartition Partition()
